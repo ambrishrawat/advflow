@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''Train a simple deep CNN on the CIFAR10 small images dataset.
 
 GPU run command:
@@ -19,11 +20,12 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD
 from keras.utils import np_utils
+from keras.models import model_from_json
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 200
-data_augmentation = True
+nb_epoch = 1
+data_augmentation = False
 
 # input image dimensions
 img_rows, img_cols = 32, 32
@@ -108,3 +110,11 @@ else:
                         samples_per_epoch=X_train.shape[0],
                         nb_epoch=nb_epoch,
                         validation_data=(X_test, Y_test))
+
+
+model_json = model.to_json()
+with open("model_gpu.json", "w") as json_file:
+    json_file.write(model_json)
+# serialize weights to HDF5
+model.save_weights("model_gpu.h5")
+print("Saved model to disk")
