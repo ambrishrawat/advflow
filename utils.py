@@ -47,13 +47,14 @@ def max_pool_2x2(x):
                         strides=[1, 2, 2, 1], padding='SAME')
 
 
-class DictIterator():
+class CSVGenerator():
     '''
     Class for iterating over a pandas data frame with filenames and addresses
 
     TODO
     add comments
     '''
+
     def __init__(self,csv_location = None,
                  batch_size=32,
                  shuffle=False,
@@ -67,6 +68,9 @@ class DictIterator():
         self.total_batches_seen = 0
         self.index_gen = self._idx_gen(self.N,batch_size,shuffle)
         self.target_size = target_size
+
+    def get_data_size(self):
+        return self.N
 
     def _idx_gen(self,N,batch_size=32,shuffle=False):
         batch_index = 0
@@ -93,8 +97,6 @@ class DictIterator():
             img = np.asarray(img)
             lab = [self.df.iloc[i].iloc[1:].values.astype('float32') for i in index_array]
             lab = np.asarray(lab)
-            print(img.shape)
-            print(lab.shape)
             yield img,lab
 
 

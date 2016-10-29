@@ -1,63 +1,60 @@
 #!/usr/bin/env python
 
-from marchs import *
+from model_defs import *
+from utils import *
 import argparse
 import pandas as pd
 import os
 import numpy as np
 import csv
+from keras.models import model_from_json
 
-def run(epochs,batch_size):
+
+def run(csv_location,batch_size,mid):
      
-    #define the optimiser and compile
-    model = vgg19()
-    sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd)
  
-    #define the batch generator    
-    train_datagen = ImageDataGenerator()
-
-    train_generator = train_datagen.flow_from_directory(
-        '/dccstor/dlw/ambrish/data/tinyImageNet/tiny-imagenet-200/train',
-        target_size=(150, 150),
-        batch_size=32,
-        class_mode='categorical') 
-
-
-    #callbacks
+    #define the batch generator   (validation set)
+    val_datagen = CSVGenerator(csv_location=csv_location,
+                                 batch_size=batch_size)
     
-    #call fit_generartor
-    model.fit_generator(
-        train_generator,
-        samples_per_epoch=2000,
-        nb_epoch=epochs,
-        max_q_size=5)
+    val_generator = val_datagen.batch_gen()
+
+    # load json and create model
+    json_file = open('models/'+mid+'.json', 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    model = model_from_json(loaded_model_json)
+    # load weights into new model
+    model.load_weights("models/"+mid+".h5")
+    print("Loaded model from disk")
+ 
+    # evaluate loaded model on test data
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
-    
+    val_loss = model.evaluate_generator(
+       generator = val_generator,
+       val_samples = val_datagen.get_data_size())
+ 
+    print("%s: %.2f%%" % (model.metrics_names[1], val_loss[1]*100))
+    print(val_loss)
+
     pass
 
 
-def append_line(batch_size,t):
-    r = np.concatenate([np.asarray([ncpu,ngpu,batch_size]),t])
-    resultFile = open('results.csv','a')
-    wr = csv.writer(resultFile,lineterminator='\n')
-    wr.writerows([r])
-    resultFile.close()
     
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Train VGG19 on tinyimagenet using keras')
-    parser.add_argument('--epochs', type=str, default='5', help='number of epochs (the program runs through the whole data set)')
+    parser.add_argument('--csvpath', type=str, default='preprocessing/valset.csv', help='batch size')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
+    parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
     
-    epochs = int(args.epochs)
+    csv_location = args.csvpath
     batch_size = int(args.batchsize)
-    
+    mid = args.mid
+ 
     #run the model
-    run(epochs=epochs,batch_size=batch_size)
-    
-    #append a line of stats to the file
-    #ppend_line(ncpu=ncpu,ngpu=ngpu,batch_size=batch_size,t=t)
+    run(csv_location=csv_location,batch_size=batch_size,mid=mid)
     
     
