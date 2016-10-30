@@ -9,7 +9,7 @@ import numpy as np
 import csv
 from keras.callbacks import Callback
 import time
-
+from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
 
 class ForEveryEpoch(Callback):
 
@@ -28,7 +28,7 @@ class ForEveryEpoch(Callback):
 
         ''' Save after every 100 epoch'''
 
-        if epoch%100==0:
+        if epoch%20==0 and epoch != 0:
 
             # serialize weights to HDF5
             self.model.save_weights("models/"+mid+'/snap_e'+str(epoch)+".h5")
@@ -73,11 +73,22 @@ class ForEveryEpoch(Callback):
 def run(epochs,batch_size,mid):
      
     '''define the optimiser and compile'''
-    model = vgg19()
-    sgd = SGD(lr=0.001, decay=1e-6, nesterov=False)
-    #opt_tag = 'sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)'
-    opt_tag = 'adam'
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metric=['accuracy'])
+    #model = vgg_like()
+    model = VGG_16_3()
+
+    opt = SGD(lr=0.001, decay=1.e-5, momentum=0.9, nesterov=False)
+    #opt = RMSprop(lr=0.0001)
+    #opt = Adadelta(lr=0.001)
+    #opt = Adam(lr=0.001)
+    #opt = Adagrad(lr=0.001)
+
+    opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=True)'    
+    #opt_tag = 'rms = RMSprop(lr=0.0001)'
+    #opt_tag = 'adadelta = Adadelta(lr=0.001)'
+    #opt_tag = 'adam = Adam(lr=0.001)'
+    #opt_tag = 'adagrad= Adagrad(lr=0.001)'
+
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metric=['accuracy'])
  
     '''define the batch generator   (training set)'''
     train_datagen = CSVGenerator(csv_location='preprocessing/trainset.csv',
@@ -118,8 +129,8 @@ def run(epochs,batch_size,mid):
     '''call fit_generartor'''
     model.fit_generator(
         generator=train_generator,
-        samples_per_epoch=train_datagen.get_data_size()/4,
-        #samples_per_epoch=batch_size,
+        samples_per_epoch=train_datagen.get_data_size(),
+        #samples_per_epoch=,
         nb_epoch=epochs,
         callbacks=[cEpochs],
         #validation_data = val_generator,

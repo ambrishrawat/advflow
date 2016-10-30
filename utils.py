@@ -11,6 +11,7 @@ import csv
 from scipy.misc import imresize, imread, imshow
 import skimage
 from skimage import io
+import keras
 
 def load_img(img_filename):
     """
@@ -28,7 +29,12 @@ def load_img(img_filename):
         img = img[:, :, np.newaxis]
     elif img.shape[2] == 4:
         img = img[:, :, :3]
+
+    '''Subtract channel vise mean'''
+    ch_mean = np.load('preprocessing/ch_mean.npy')
+    img = img - ch_mean
     return img
+
 
 
 class CSVGenerator():
@@ -81,6 +87,10 @@ class CSVGenerator():
             img = np.asarray(img)
             lab = [self.df.iloc[i].iloc[1:].values.astype('float32') for i in index_array]
             lab = np.asarray(lab)
+            if keras.backend.image_dim_ordering() == 'th':
+                nimg, ch, h, w = img.shape[0], img.shape[3], img.shape[1], img.shape[2] 
+                img = np.rollaxis(img, 2, 1).reshape(nimg, ch, h, w)
+
             #print('Yoda'+str(index_array[0]))
             yield img,lab
 
