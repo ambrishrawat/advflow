@@ -1,4 +1,0 @@
-Epoch,500
-Batch size,125
-Optimisation,"sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)"
-0,1477829370.309273,1477829499.9436204,129.63434743881226

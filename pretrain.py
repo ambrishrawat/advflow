@@ -9,7 +9,7 @@ import numpy as np
 import csv
 from keras.callbacks import Callback
 import time
-
+import keras
 
 class ForEveryEpoch(Callback):
 
@@ -71,9 +71,14 @@ class ForEveryEpoch(Callback):
 
 
 def run(epochs,batch_size,mid):
-     
+    
+    # Image dimensions ordering should follow the Theano convention
+    if keras.backend.image_dim_ordering() != 'th':
+        keras.backend.set_image_dim_ordering('th')
+        #print "INFO: '~/.keras/keras.json' sets 'image_dim_ordering' to 'tf', temporarily setting to 'th'" 
     '''define the optimiser and compile'''
-    model = vgg19()
+    model = VGG_16()
+    return
     sgd = SGD(lr=0.001, decay=1e-6, nesterov=False)
     #opt_tag = 'sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)'
     opt_tag = 'adam'

@@ -81,6 +81,7 @@ class CSVGenerator():
             img = np.asarray(img)
             lab = [self.df.iloc[i].iloc[1:].values.astype('float32') for i in index_array]
             lab = np.asarray(lab)
+            #print('Yoda'+str(index_array[0]))
             yield img,lab
 
 
