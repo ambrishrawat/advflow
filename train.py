@@ -74,7 +74,7 @@ def run(epochs,batch_size,mid):
      
     '''define the optimiser and compile'''
     #model = vgg_like()
-    model = VGG_16_3()
+    model = VGG_16_2()
 
     opt = SGD(lr=0.001, decay=1.e-5, momentum=0.9, nesterov=False)
     #opt = RMSprop(lr=0.0001)
