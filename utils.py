@@ -30,22 +30,6 @@ def load_img(img_filename):
         img = img[:, :, :3]
     return img
 
-def weight_variable(shape,stddev=0.05):
-    initial = tf.truncated_normal(shape, stddev=stddev)
-    return tf.Variable(initial)
-
-def bias_variable(shape,cons=0.1):
-    initial = tf.constant(cons, shape=shape)
-    return tf.Variable(initial)
-
-
-def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-
-def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
-                        strides=[1, 2, 2, 1], padding='SAME')
-
 
 class CSVGenerator():
     '''
@@ -101,20 +85,6 @@ class CSVGenerator():
 
 
 
-class EpochTime(Callback):
-
-    def __init__(self):
-        self.time_begin = []
-        self.time_end = []
-
-    def on_epoch_end(self, epoch, logs={}):
-        self.time_end.append(time.time())
-
-    def on_epoch_begin(self, epoch, logs={}):
-        self.time_begin.append(time.time())
-
-    #def on_batch_end(self, batch, logs={}):
-    #    print('Batch ends: '+str(batch))
 
 
 
