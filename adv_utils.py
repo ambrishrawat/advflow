@@ -41,9 +41,14 @@ def batch_eval(sess, tf_inputs, tf_outputs, numpy_inputs):
         assert e.shape[0] == m, e.shape
     return out
 
-def fgsm_generator(
-    model=None,
-    generator=None):
+def fgsm_generator(model=None, generator=None)
+    '''
+    Generates adversrial images for a trained model
+    '''
+    adv_x = fgsm_graph(model)
+    
+
+def fgsm_graph(model=None)
     '''
     Generates adversrial images for a trained model
     '''
@@ -51,7 +56,6 @@ def fgsm_generator(
     #define a placeholder for input images
     x = tf.placeholder(tf.float32, shape=(None, 64, 64, 3))
     y = tf.placeholder(tf.float32, shape=(None, 200))
-
 
     #define the computation graph
     predictions = model(x)

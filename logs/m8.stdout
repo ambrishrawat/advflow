@@ -1,0 +1,41 @@
+
+------------------------------------------------------------
+Sender: LSF System <rer@dccxc229>
+Subject: Job 849570: <m8> in cluster <dcc> Exited
+
+Job <m8> was submitted from host <dccxl010> by user <ambrish> in cluster <dcc>.
+Job was executed on host(s) <16*dccxc229>, in queue <k80_short>, as user <ambrish> in cluster <dcc>.
+</u/ambrish> was used as the home directory.
+</dccstor/dlw/ambrish/examples/adversarial> was used as the working directory.
+Started at Sun Oct 30 20:40:42 2016
+Results reported on Sun Oct 30 20:40:51 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./train.py --epochs=100 --batchsize=128 --mid=m8
+------------------------------------------------------------
+
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   4.63 sec.
+    Max Memory :                                 489 MB
+    Average Memory :                             67.00 MB
+    Total Requested Memory :                     1000.00 MB
+    Delta Memory :                               511.00 MB
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   8 sec.
+    Turnaround time :                            21208 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <logs/m8.stderr> for stderr output of this job.
+
