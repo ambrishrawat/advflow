@@ -13,10 +13,10 @@ from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
 
 class ForEveryEpoch(Callback):
 
-    def __init__(self,mid=None):
+    def __init__(self,valcsvpath=None,mid=None):
         
         self.mid = mid
-        self.val_datagen = CSVGenerator(csv_location='preprocessing/valset.csv',
+        self.val_datagen = CSVGenerator(csv_location=valcsvpath,
                                  batch_size=batch_size)
     
         self.val_generator = self.val_datagen.batch_gen()
@@ -70,20 +70,20 @@ class ForEveryEpoch(Callback):
     #    print('Batch ends: '+str(batch))
 
 
-def run(epochs,batch_size,mid):
+def run(csvpath,valcsvpath,epochs,batch_size,mid):
      
     '''define the optimiser and compile'''
     #model = vgg_like()
-    model = VGG_16_2()
+    model = VGG_16_3()
 
-    opt = SGD(lr=0.001, decay=1.e-5, momentum=0.9, nesterov=False)
-    #opt = RMSprop(lr=0.0001)
+    #opt = SGD(lr=0.001, decay=1.e-5, momentum=0.9, nesterov=False)
+    opt = RMSprop(lr=0.001)
     #opt = Adadelta(lr=0.001)
     #opt = Adam(lr=0.001)
     #opt = Adagrad(lr=0.001)
 
-    opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=True)'    
-    #opt_tag = 'rms = RMSprop(lr=0.0001)'
+    #opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=True)'    
+    opt_tag = 'rms = RMSprop(lr=0.0001)'
     #opt_tag = 'adadelta = Adadelta(lr=0.001)'
     #opt_tag = 'adam = Adam(lr=0.001)'
     #opt_tag = 'adagrad= Adagrad(lr=0.001)'
@@ -91,7 +91,7 @@ def run(epochs,batch_size,mid):
     model.compile(loss='categorical_crossentropy', optimizer=opt, metric=['accuracy'])
  
     '''define the batch generator   (training set)'''
-    train_datagen = CSVGenerator(csv_location='preprocessing/trainset.csv',
+    train_datagen = CSVGenerator(csv_location=csvpath,
                                  batch_size=batch_size,shuffle=False)
 
     train_generator = train_datagen.batch_gen()
@@ -104,7 +104,7 @@ def run(epochs,batch_size,mid):
 
 
     '''callback for epochs'''
-    cEpochs = ForEveryEpoch(mid=mid)
+    cEpochs = ForEveryEpoch(valcsvpath=valcsvpath,mid=mid)
 
 
     # serialize model to JSON
@@ -144,16 +144,22 @@ def run(epochs,batch_size,mid):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Train VGG19 on tinyimagenet using keras')
+    parser.add_argument('--csvpath', type=str, default='preprocessing/train_tinyImageNet.csv', 
+                        help='csv location for the training set csv file')
+    parser.add_argument('--valcsvpath', type=str, default='preprocessing/val_tinyImageNet.csv', 
+                        help='csv location for the validation set csv file')
     parser.add_argument('--epochs', type=str, default='5', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
-    
+   
+    csvpath = args.csvpath
+    valcsvpath = args.valcsvpath
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     mid = args.mid
     
     #run the model
-    run(epochs=epochs,batch_size=batch_size,mid=mid)
+    run(csvpath=csvpath,valcsvpath=valcsvpath,epochs=epochs,batch_size=batch_size,mid=mid)
     
     

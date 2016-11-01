@@ -25,11 +25,11 @@ class tinyImageNet(object):
         '''
         self.classes = listdir(os.path.join(self.fpath,'train'))
         num_classes = len(self.classes)
-        traincsv_file = Path('trainset.csv')
+        traincsv_file = Path('train_tinyImageNet.csv')
         if traincsv_file.is_file():
             pass
         else:
-            with open('trainset.csv', 'wt') as csvfile:
+            with open('train_tinyImageNet.csv', 'wt') as csvfile:
                 csvwriter = csv.writer(csvfile, delimiter=',')
                 csvwriter.writerow(['filename']+self.classes) #csv header
     
@@ -51,7 +51,7 @@ class tinyImageNet(object):
         '''
         for tiny ImageNet folder structure (val)
         '''
-        valcsv_file = Path('val.csv')
+        valcsv_file = Path('val_tinyImageNet.csv')
         if valcsv_file.is_file():
             pass
         else:
@@ -59,7 +59,7 @@ class tinyImageNet(object):
                 
                 reader = csv.reader(csvfile, delimiter='\t')
                 
-                with open('valset.csv', 'wt') as csvfile:
+                with open('val_tinyImageNet.csv', 'wt') as csvfile:
                     
                     csvwriter = csv.writer(csvfile, delimiter=',')
                     csvwriter.writerow(['filename']+self.classes)
