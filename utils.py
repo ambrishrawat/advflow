@@ -30,9 +30,9 @@ def load_img(img_filename):
     elif img.shape[2] == 4:
         img = img[:, :, :3]
 
-    '''Subtract channel vise mean'''
-    ch_mean = np.load('preprocessing/ch_mean.npy')
-    img = img - ch_mean
+    #'''Subtract channel vise mean'''
+    #ch_mean = np.load('preprocessing/ch_mean.npy')
+    #img = img - ch_mean
     return img
 
 
@@ -48,7 +48,7 @@ class CSVGenerator():
     def __init__(self,csv_location = None,
                  batch_size=32,
                  shuffle=False,
-                 target_size=(64,64)):
+                 target_size=(32,32)):
         
         if csv_location is not None:
             self.df = pd.read_csv(csv_location)

@@ -47,7 +47,7 @@ class ForEveryEpoch(Callback):
             
             #log the result in a csv
             with open('models/'+mid+'/acc_log.csv','a') as resultFile:
-                wr = csv.writer(resultFile,lineterminator='\n')
+                wr = csv.writer(resultFile,lineterminator='\n',delimiter='\t')
                 wr.writerow(list(map(str,[epoch,val_loss])))
 
 
@@ -59,7 +59,7 @@ class ForEveryEpoch(Callback):
             #log the result in a csv
             with open('models/'+mid+'/logs.csv','a') as resultFile:
                 
-                wr = csv.writer(resultFile,lineterminator='\n')
+                wr = csv.writer(resultFile,lineterminator='\n',delimiter='\t')
                 wr.writerow(list(map(str,[epoch,self.tbeg,self.tend,self.tend-self.tbeg])))
 
     def on_epoch_begin(self, epoch, logs={}):
@@ -73,17 +73,17 @@ class ForEveryEpoch(Callback):
 def run(csvpath,valcsvpath,epochs,batch_size,mid):
      
     '''define the optimiser and compile'''
-    #model = vgg_like()
-    model = VGG_16_3()
+    #model = VGG_16_3()
+    model = cifar_keras()
 
-    #opt = SGD(lr=0.001, decay=1.e-5, momentum=0.9, nesterov=False)
-    opt = RMSprop(lr=0.001)
+    opt = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=False)
+    #opt = RMSprop(lr=0.001)
     #opt = Adadelta(lr=0.001)
     #opt = Adam(lr=0.001)
     #opt = Adagrad(lr=0.001)
 
-    #opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=True)'    
-    opt_tag = 'rms = RMSprop(lr=0.0001)'
+    opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=False)'    
+    #opt_tag = 'rms = RMSprop(lr=0.0001)'
     #opt_tag = 'adadelta = Adadelta(lr=0.001)'
     #opt_tag = 'adam = Adam(lr=0.001)'
     #opt_tag = 'adagrad= Adagrad(lr=0.001)'
@@ -143,11 +143,15 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid):
     
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description='Train VGG19 on tinyimagenet using keras')
-    parser.add_argument('--csvpath', type=str, default='preprocessing/train_tinyImageNet.csv', 
+    parser = argparse.ArgumentParser(description='Train a model using keras')
+    parser.add_argument('--csvpath', type=str, default='preprocessing/train_cifar10.csv', 
                         help='csv location for the training set csv file')
-    parser.add_argument('--valcsvpath', type=str, default='preprocessing/val_tinyImageNet.csv', 
+    parser.add_argument('--valcsvpath', type=str, default='preprocessing/test_cifar10.csv', 
                         help='csv location for the validation set csv file')
+    #parser.add_argument('--csvpath', type=str, default='preprocessing/train_tinyImageNet.csv', 
+    #                    help='csv location for the training set csv file')
+    #parser.add_argument('--valcsvpath', type=str, default='preprocessing/val_tinyImageNet.csv', 
+    #                    help='csv location for the validation set csv file')
     parser.add_argument('--epochs', type=str, default='5', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
