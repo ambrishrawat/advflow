@@ -10,8 +10,37 @@ import csv
 from keras.models import model_from_json
 from adv_utils import *
 
+import pandas as pd
+def savefigs(csv_location=None,
+             dest_path = None,
+             images = None):
+    '''
+    save the figures at dest_path
+    ordering and filenames from csv at csv_location
+    '''
+    df = None
 
+    if csv_location is not None:
+        df = pd.read_csv(csv_location)
+    else:
+        raise ValueError
 
+    N = df.shape[0]
+    M = images.shape[0]
+    assert M==N, M
+    
+    for i in range(M):
+
+        img = images[i]
+        path = df.iloc[i]['filename']
+        filename = path.rsplit('/', 1)[-1]
+        
+        save_fig(img,dest_path,fileame)
+        imsave(os.path.join(dest_path,'adv',filename),img)
+        df.iloc[i]['filename'] = os.path.join(dest_path,'adv',filename)
+
+    #save dataframe to csv
+    df.to_csv(os.path.join(data_path,'adv','annotations.csv'))
 def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
      
 
@@ -37,11 +66,15 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
     # compile the loaded model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
-    #fgsm_generator(model=model, generator=val_generator, nbsamples=nbsamples,
-    #               epsilon=epsilon,savedir=savedir,sess=sess)
+    adv_images = fgsm_generator(model=model, generator=val_generator, nbsamples=nbsamples,
+                   epsilon=epsilon,savedir=savedir,sess=sess)
 
-    stochastic_prediction(model=model, generator=val_generator, nbsamples=nbsamples,
-                   num_feed_forwards=10,savedir=savedir,sess=sess)
+    savefigs(csv_location=csv_location,
+             dest_path = dest_path,
+             images = adv_images)
+
+    #stochastic_prediction(model=model, generator=val_generator, nbsamples=nbsamples,
+    #               num_feed_forwards=10,savedir=savedir,sess=sess)
     pass
 
 
