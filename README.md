@@ -1,6 +1,7 @@
 #AdvFlow
 
-A library over TensorFlow to experimnent with Adversarial Images for tiny-ImageNet and CIFAR data set.
+A library over TensorFlow and Keras to experimnent with Adversarial Images.
+Examples included for tiny-ImageNet and CIFAR-10 data sets.
 
 ##Installation
 Add repository to your PYTHONPATH
