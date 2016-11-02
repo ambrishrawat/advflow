@@ -11,6 +11,10 @@ For preprocessing run the following command from the preproceesing folder
 ```
 ./make_csv.py --fpath='<path to>/tiny-imagenet-200/'
 ```
+or
+```
+./make_csv.py --fpath='<path to>/cifar-10-batches-py/' --cifarpath='<destination path for saving JPEGs>'
+```
 ##Training
 ```
 ./train.py -h (for help)
