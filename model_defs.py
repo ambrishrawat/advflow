@@ -29,7 +29,12 @@ import keras
 import h5py 
 from keras.applications.vgg16 import VGG16
 
+
 def vgg_like(weights=None):
+    '''
+    VGG like model with two convolution blocks and two dense layers
+    no pretraining
+    '''
     # Image dimensions ordering should follow the Theano convention
     if keras.backend.image_dim_ordering() != 'th':
         keras.backend.set_image_dim_ordering('th')
@@ -64,7 +69,13 @@ def vgg_like(weights=None):
     return model 
 
 
-def VGG_16_4():
+def VGG_16add_pretrain():
+
+    '''
+    VGG_16 model with pre-trained weights for all convolutional blocks
+    Only two dense layers as opposed to the conventional 3
+    '''
+    
     # Image dimensions ordering should follow the Theano convention
     if keras.backend.image_dim_ordering() != 'th':
         keras.backend.set_image_dim_ordering('th')
@@ -142,7 +153,12 @@ def VGG_16_4():
     return model
 
 
-def VGG_16_3():
+def VGG_16_pretrain_2():
+
+    '''
+    VGG_16 model with pre-trained weights for all convolutional blocks
+    (using VGG16 from keras.applications.vgg16) 
+    '''
 
     # Image dimensions ordering should follow the Theano convention
     if keras.backend.image_dim_ordering() != 'th':
@@ -161,93 +177,11 @@ def VGG_16_3():
     return model
 
 
-def VGG_16_2():
+def VGG_16_pretrain_1(trainable=False, weights_path = None):
 
-    # Image dimensions ordering should follow the Theano convention
-    if keras.backend.image_dim_ordering() != 'th':
-        keras.backend.set_image_dim_ordering('th')
-
-    # this applies 32 convolution filters of size 3x3 each.
-    model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,64,64)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-   
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-    
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-   
-    model.add(Flatten())
-    model.add(Dense(4096, activation='relu'))
-    #model.add(Dropout(0.5))
-    #model.add(Dense(4096, activation='relu'))
-    #model.add(Dropout(0.5))
-    #model.add(Dense(1000, activation='softmax'))
-    
-    # load the weights
-    #model.load_weights('models/vgg16_weights.h5')
-    
-    # pop last layer, insert my own
-    #model.layers.pop()
-    #model.add(Dropout(0.5))
-    #model.add(Dense(200))
-    #model.add(Activation('softmax'))
-
-    # get the symbolic outputs of each "key" layer (we gave them unique names).
-    layer_dict = dict([(layer.name, layer) for layer in model.layers])
-
-    # load the weights
-
-    import h5py
-
-    weights_path = 'models/vgg16_weights.h5'
-
-    f = h5py.File(weights_path)
-    for k in range(f.attrs['nb_layers']):
-        if k >= len(model.layers):
-            # we don't look at the last (fully-connected) layers in the savefile
-            break
-        g = f['layer_{}'.format(k)]
-        weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
-        model.layers[k].set_weights(weights)
-    f.close()
-    print('Model loaded.')
-
-    model.add(Dropout(0.5))
-    model.add(Dense(200, name='dense_3', trainable=True))
-    model.add(Activation("softmax"))
-    return model
-
-   
-def VGG_16(trainable=False):
+    '''
+    VGG_16 model with pre-trained weights for all convolutional blocks
+    '''
 
     # Image dimensions ordering should follow the Theano convention
     if keras.backend.image_dim_ordering() != 'th':
@@ -298,25 +232,25 @@ def VGG_16(trainable=False):
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
 
 
-    # get the symbolic outputs of each "key" layer (we gave them unique names).
-    layer_dict = dict([(layer.name, layer) for layer in model.layers])
 
-    # load the weights
+    if weights_path is not None:
+        # get the symbolic outputs of each "key" layer (we gave them unique names).
+        layer_dict = dict([(layer.name, layer) for layer in model.layers])
 
-    import h5py
 
-    weights_path = 'models/vgg16_weights.h5'
+        # load the weights
+        #weights_path = 'models/vgg16_weights.h5'
 
-    f = h5py.File(weights_path)
-    for k in range(f.attrs['nb_layers']):
-        if k >= len(model.layers):
-            # we don't look at the last (fully-connected) layers in the savefile
-            break
-        g = f['layer_{}'.format(k)]
-        weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
-        model.layers[k].set_weights(weights)
-    f.close()
-    print('Model loaded.')
+        f = h5py.File(weights_path)
+        for k in range(f.attrs['nb_layers']):
+            if k >= len(model.layers):
+                # we don't look at the last (fully-connected) layers in the savefile
+                break
+            g = f['layer_{}'.format(k)]
+            weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
+            model.layers[k].set_weights(weights)
+        f.close()
+        print('Model loaded.')
 
     model.add(Flatten())
     model.add(Dense(1024, activation='relu', name='dense_1', trainable=True))
@@ -324,14 +258,18 @@ def VGG_16(trainable=False):
     model.add(Dense(512, activation='relu', name='dense_2', trainable=True))
     model.add(Dropout(0.5))
     model.add(Dense(200, name='dense_3', trainable=True))
-    model.add(Activation("sigmoid"))
+    model.add(Activation("softmax"))
 
 
     return model
 
 
 
-def vgg19():
+def VGG_19():
+    '''
+    Fully trainable VGG19 model
+    '''
+
     model = Sequential()
 
     model.add(ZeroPadding2D((1,1),input_shape=(64,64,3)))
@@ -400,9 +338,6 @@ def nin(input_shape):
                             init='normal',subsample=(1,1), input_shape = input_shape))
     model.add(MaxPooling2D(pool_size=(3, 2)))
 
-
-
-
     model.add(Convolution2D(96, 11, 11, activation='relu', name='conv1_1',
                             init='normal',subsample=(4,4), input_shape = input_shape))
     model.add(Convolution2D(96, 1, 1, activation='relu', name='conv1_1',
@@ -410,7 +345,6 @@ def nin(input_shape):
     model.add(Convolution2D(96, 1, 1, activation='relu', name='conv1_1',
                             init='normal',subsample=(1,1), input_shape = input_shape))
     model.add(MaxPooling2D(pool_size=(3, 2)))
-
 
     model.add(Dropout(0.25))
 
