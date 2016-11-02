@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.backend import categorical_crossentropy
 from keras import backend as K
-
+import numpy as np
 
 
 
@@ -46,12 +46,49 @@ def batch_eval(sess, tf_inputs, tf_outputs, numpy_inputs):
         assert e.shape[0] == m, e.shape
     return out
 
+
+def run_batch_generator(model=None, 
+                        generator=None, 
+                        inputs=None, 
+                        outputs = None, 
+                        learning_phase = None,
+                        sess=None, nbsamples = None):
+    '''
+    Executes the computation graph on batches obtained from generator 
+    Returned the specified output
+    '''
+    out = []
+    for _ in outputs:
+        out.append([])
+    with sess.as_default():
+        #time to run the session!!
+        samples_seen = 0
+        while samples_seen <= nbsamples:
+            X,_ = generator.__next__()
+            samples_seen+=X.shape[0]
+            feed_dict = dict()
+            feed_dict[inputs] = X
+            feed_dict[K.learning_phase()] = learning_phase
+            batch_out = sess.run(outputs,feed_dict = feed_dict)
+            for out_elem, batch_out_ele in zip(out, batch_out):
+                out_elem.append(batch_out_ele)
+    out = list(map(lambda x: np.concatenate(x, axis=0), out))
+    return out
+
 def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, savedir=None, sess=None):
     '''
-    Generates adversrial images for a trained model
+    Executes the adv_x ops on image batches obtained from generator
     '''
-    adv_x,x,grads = fgsm_graph(model, eps=epsilon)
-   
+    adv_x,x,predictions = fgsm_graph(model, eps=epsilon)
+     
+    out = run_batch_generator(model=model, 
+                        generator=generator, 
+                        inputs=x, 
+                        outputs = [adv_x],
+                        learning_phase = 0,
+                        sess=sess, nbsamples = nbsamples)
+    print(out[0].shape)
+    '''
     with sess.as_default(): 
         #time to run the session!!
         samples_seen = 0
@@ -61,17 +98,18 @@ def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, sav
             feed_dict = dict()
             feed_dict[x] = X
             feed_dict[K.learning_phase()] = 1
-            output = sess.run([adv_x,grads],feed_dict = feed_dict)
+            output = sess.run([adv_x, predictions],feed_dict = feed_dict)
 
             adv_X = output[0]
-            grads = output[1]
+            predic = output[1]
             print('Yoda '+str(X.shape[0])+ ' '+ str(samples_seen))
-            print(sum(grads))
+            print(predic)
+    '''
     #X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
 
 def fgsm_graph(model=None, eps=None):
     '''
-    Generates adversrial images for a trained model
+    Creates adv_x ops 
     '''
 
     #define a placeholder for input images

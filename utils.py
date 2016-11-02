@@ -90,7 +90,6 @@ class CSVGenerator():
             if keras.backend.image_dim_ordering() == 'th':
                 nimg, ch, h, w = img.shape[0], img.shape[3], img.shape[1], img.shape[2] 
                 img = np.rollaxis(img, 2, 1).reshape(nimg, ch, h, w)
-            print('Yoda nimg' + str(img.shape[0]) + ' ' + str(img.shape[1])+ ' ' +str(img.shape[2]) + ' ' + str(img.shape[3]))
             #print('Yoda'+str(index_array[0]))
             yield img,lab
 

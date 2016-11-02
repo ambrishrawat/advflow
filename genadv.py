@@ -24,11 +24,12 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
 
     # load json and create model
 
-    json_file = open('models/'+mid+'/model_arch.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    #model = cifar_keras()
+    #json_file = open('models/'+mid+'/model_arch.json', 'r')
+    #loaded_model_json = json_file.read()
+    #json_file.close()
+    #model = model_from_json(loaded_model_json)
+    
+    model = cifar_keras()
     # load weights into new model
     model.load_weights("models/"+mid+"/snap_e60.h5")
     print("Loaded model from disk")
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10.csv', help='batch size')
     parser.add_argument('--mid', type=str, default='m11', help='model id for saving')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
-    parser.add_argument('--nbsamples', type=str, default='100', help='total samples')
+    parser.add_argument('--nbsamples', type=str, default='1000', help='total samples')
     parser.add_argument('--epsilon', type=str, default='0.3', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
