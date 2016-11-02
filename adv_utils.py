@@ -54,8 +54,8 @@ def fgsm_graph(model=None)
     '''
 
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 64, 64, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 200))
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
 
     #define the computation graph
     predictions = model(x)
