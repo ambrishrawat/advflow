@@ -1,4 +1,9 @@
 import tensorflow as tf
+from keras.backend import categorical_crossentropy
+from keras import backend as K
+
+
+
 
 def batch_eval(sess, tf_inputs, tf_outputs, numpy_inputs):
     """
@@ -41,14 +46,30 @@ def batch_eval(sess, tf_inputs, tf_outputs, numpy_inputs):
         assert e.shape[0] == m, e.shape
     return out
 
-def fgsm_generator(model=None, generator=None)
+def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, savedir=None, sess=None):
     '''
     Generates adversrial images for a trained model
     '''
-    adv_x = fgsm_graph(model)
-    
+    adv_x,x,grads = fgsm_graph(model, eps=epsilon)
+   
+    with sess.as_default(): 
+        #time to run the session!!
+        samples_seen = 0
+        while samples_seen <= nbsamples:
+            X,_ = generator.__next__() 
+            samples_seen+=X.shape[0]
+            feed_dict = dict()
+            feed_dict[x] = X
+            feed_dict[K.learning_phase()] = 1
+            output = sess.run([adv_x,grads],feed_dict = feed_dict)
 
-def fgsm_graph(model=None)
+            adv_X = output[0]
+            grads = output[1]
+            print('Yoda '+str(X.shape[0])+ ' '+ str(samples_seen))
+            print(sum(grads))
+    #X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
+
+def fgsm_graph(model=None, eps=None):
     '''
     Generates adversrial images for a trained model
     '''
@@ -77,6 +98,5 @@ def fgsm_graph(model=None)
     # Add perturbation to original example to obtain adversarial example
     adv_x = tf.stop_gradient(x + scaled_signed_grad)
 
-    X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
 
-    return adv_x
+    return adv_x, x, grad
