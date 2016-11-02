@@ -37,9 +37,11 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
     # compile the loaded model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
-    fgsm_generator(model=model, generator=val_generator, nbsamples=nbsamples,
-                   epsilon=epsilon,savedir=savedir,sess=sess)
+    #fgsm_generator(model=model, generator=val_generator, nbsamples=nbsamples,
+    #               epsilon=epsilon,savedir=savedir,sess=sess)
 
+    stochastic_prediction(model=model, generator=val_generator, nbsamples=nbsamples,
+                   num_feed_forwards=10,savedir=savedir,sess=sess)
     pass
 
 

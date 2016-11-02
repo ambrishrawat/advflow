@@ -77,7 +77,7 @@ def run_batch_generator(model=None,
 
 def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, savedir=None, sess=None):
     '''
-    Executes the adv_x ops on image batches obtained from generator
+    creates and executes the adv_x ops on image batches obtained from generator
     '''
     adv_x,x,predictions = fgsm_graph(model, eps=epsilon)
      
@@ -88,23 +88,9 @@ def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, sav
                         learning_phase = 0,
                         sess=sess, nbsamples = nbsamples)
     print(out[0].shape)
-    '''
-    with sess.as_default(): 
-        #time to run the session!!
-        samples_seen = 0
-        while samples_seen <= nbsamples:
-            X,_ = generator.__next__() 
-            samples_seen+=X.shape[0]
-            feed_dict = dict()
-            feed_dict[x] = X
-            feed_dict[K.learning_phase()] = 1
-            output = sess.run([adv_x, predictions],feed_dict = feed_dict)
-
-            adv_X = output[0]
-            predic = output[1]
-            print('Yoda '+str(X.shape[0])+ ' '+ str(samples_seen))
-            print(predic)
-    '''
+    
+    ''' TODO: sabe the adv in a specified location; make a wrapper over this function'''
+    return out[0]
     #X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
 
 def fgsm_graph(model=None, eps=None):
@@ -138,3 +124,27 @@ def fgsm_graph(model=None, eps=None):
 
 
     return adv_x, x, grad
+
+
+def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_forwards=10, savedir=None, sess=None):
+    '''
+    Creates and executes ops for stochastic prediction
+    '''
+
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
+
+    #define the computation graph
+    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
+
+    #execute the the ops in Tf sessions
+    out = run_batch_generator(model=model, 
+                        generator=generator, 
+                        inputs=x, 
+                        outputs = [predictions],
+                        learning_phase = 1,
+                        sess=sess, nbsamples = nbsamples)
+
+    print(out[0].shape)
+    return out
