@@ -3,7 +3,7 @@
 A library over TensorFlow to experimnent with Adversarial Images for tiny-ImageNet and CIFAR data set.
 
 ##Installation
-To run the scripts, add repository to the PYTHONPATH
+Add repository to your PYTHONPATH
 
 ##Preprocessing the data sets
 For preprocessing run the following command from the preproceesing folder
