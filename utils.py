@@ -91,6 +91,9 @@ class CSVGenerator():
                 nimg, ch, h, w = img.shape[0], img.shape[3], img.shape[1], img.shape[2] 
                 img = np.rollaxis(img, 2, 1).reshape(nimg, ch, h, w)
             #print('Yoda'+str(index_array[0]))
+
+            img = img.astype('float32')
+            img /= 255
             yield img,lab
 
 

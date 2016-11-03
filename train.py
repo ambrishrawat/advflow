@@ -17,7 +17,7 @@ class ForEveryEpoch(Callback):
         
         self.mid = mid
         self.val_datagen = CSVGenerator(csv_location=valcsvpath,
-                                 batch_size=batch_size)
+                                 batch_size=batch_size, target_size=(32,32))
     
         self.val_generator = self.val_datagen.batch_gen()
 
@@ -74,25 +74,27 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid):
      
     '''define the optimiser and compile'''
     #model = VGG_16_3()
+    #model = VGG_16_pretrain_1()
     model = cifar_keras()
 
-    opt = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=False)
+    #opt = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=True)
     #opt = RMSprop(lr=0.001)
     #opt = Adadelta(lr=0.001)
-    #opt = Adam(lr=0.001)
+    opt = Adam(lr=0.001)
     #opt = Adagrad(lr=0.001)
 
-    opt_tag = 'sgd = SGD(lr=0.001, decay=1.e-6, momentum=0.9, nesterov=False)'    
+    #opt_tag = 'sgd = SGD(lr=0.0001, decay=1.e-6, momentum=0.9, nesterov=False)'    
     #opt_tag = 'rms = RMSprop(lr=0.0001)'
     #opt_tag = 'adadelta = Adadelta(lr=0.001)'
-    #opt_tag = 'adam = Adam(lr=0.001)'
+    opt_tag = 'adam = Adam(lr=0.001)'
     #opt_tag = 'adagrad= Adagrad(lr=0.001)'
 
     model.compile(loss='categorical_crossentropy', optimizer=opt, metric=['accuracy'])
  
     '''define the batch generator   (training set)'''
     train_datagen = CSVGenerator(csv_location=csvpath,
-                                 batch_size=batch_size,shuffle=False)
+                                 batch_size=batch_size,
+                                 target_size=(32,32),shuffle=False)
 
     train_generator = train_datagen.batch_gen()
     

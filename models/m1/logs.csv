@@ -1,0 +1,9 @@
+Epoch,200
+Batch size,32
+Optimisation,"sgd = SGD(lr=0.0001, decay=1.e-6, momentum=0.9, nesterov=False)"
+Epoch,200
+Batch size,32
+Optimisation,"sgd = SGD(lr=0.0001, decay=1.e-6, momentum=0.9, nesterov=False)"
+Epoch,200
+Batch size,128
+Optimisation,"sgd = SGD(lr=0.0001, decay=1.e-6, momentum=0.9, nesterov=False)"
