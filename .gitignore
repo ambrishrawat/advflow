@@ -6,3 +6,7 @@ __pycache__/*
 .ipynb_checkpoints
 .ipynb_checkpoints/*
 *.cmd
+*.stdout
+*.stderr
+logs/
+logs/*
