@@ -136,7 +136,7 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
     y = tf.placeholder(tf.float32, shape=(None, 10))
 
     #define the computation graph
-    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
+    predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
 
     #execute the the ops in Tf sessions
     out = run_batch_generator(model=model, 
