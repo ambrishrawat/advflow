@@ -48,7 +48,7 @@ class CSVGenerator():
     def __init__(self,csv_location = None,
                  batch_size=32,
                  shuffle=False,
-                 target_size=(32,32)):
+                 target_size=None):
         
         if csv_location is not None:
             self.df = pd.read_csv(csv_location)
@@ -83,15 +83,19 @@ class CSVGenerator():
     def batch_gen(self):
         while 1:
             index_array, current_index, current_batch_size = self.index_gen.__next__()
-            img = [imresize(load_img(self.df.iloc[i]['filename']),size=self.target_size) for i in index_array]
+            
+            if self.target_size is not None:    
+                img = [imresize(load_img(self.df.iloc[i]['filename']),size=self.target_size) for i in index_array]
+            else:
+                img = [load_img(self.df.iloc[i]['filename']) for i in index_array]
             img = np.asarray(img)
             lab = [self.df.iloc[i].iloc[1:].values.astype('float32') for i in index_array]
             lab = np.asarray(lab)
             if keras.backend.image_dim_ordering() == 'th':
                 nimg, ch, h, w = img.shape[0], img.shape[3], img.shape[1], img.shape[2] 
                 img = np.rollaxis(img, 2, 1).reshape(nimg, ch, h, w)
-            #print('Yoda'+str(index_array[0]))
 
+            #Convert to float as most pretrained models are trained on this
             img = img.astype('float32')
             img /= 255
             yield img,lab

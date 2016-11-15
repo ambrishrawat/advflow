@@ -13,7 +13,7 @@ from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
 
 class ForEveryEpoch(Callback):
 
-    def __init__(self,valcsvpath=None,mid=None,target_size=(32,32)):
+    def __init__(self,valcsvpath=None,mid=None,target_size=None):
         
         self.mid = mid
         self.val_datagen = CSVGenerator(csv_location=valcsvpath,
@@ -70,27 +70,27 @@ class ForEveryEpoch(Callback):
     #    print('Batch ends: '+str(batch))
 
 
-def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size):
+def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
      
     '''define the optimiser and compile'''
     #model = VGG_16_pretrain_2()
-    model = VGG_16_pretrain_1(weights_path='./models/vgg16_weights.h5')
-    #model = cifar_keras()
+    #model = VGG_16_pretrain_1(weights_path='./models/vgg16_weights.h5')
+    model = cifar_keras()
     #opt = SGD(lr=0.0065, decay=1e-6, momentum=0.9, nesterov=True)
-    opt = SGD(lr=5.e-4, decay=1.e-6, nesterov=False)
+    opt = SGD(lr=5.e-3, decay=1.e-6, nesterov=False)
     #opt = RMSprop(lr=0.0001)
     #opt = Adadelta(lr=0.001)
     #opt = Adam()
     #opt = Adagrad(lr=0.001)
 
-    opt_tag = 'sgd = SGD(lr=5.e-4, decay=1.e-6,  nesterov=False)'    
-    #opt_tag = 'sgd = SGD(lr=5.e-3, decay=1.e-6,  nesterov=False)'    #worked for cifar_keras()
+    #opt_tag = 'sgd = SGD(lr=5.e-4, decay=1.e-6,  nesterov=False)'    
+    opt_tag = 'sgd = SGD(lr=5.e-3, decay=1.e-6,  nesterov=False)'    #worked for cifar_keras()
     #opt_tag = 'rms = RMSprop(lr=0.0001)'
     #opt_tag = 'adadelta = Adadelta(lr=0.001)'
     #opt_tag = 'adam = Adam(lr=0.001)'
     #opt_tag = 'adagrad= Adagrad(lr=0.001)'
 
-    model.compile(loss='categorical_crossentropy', optimizer=opt, metric=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metric=['accuracy'])
  
     '''define the batch generator   (training set)'''
     train_datagen = CSVGenerator(csv_location=csvpath,
@@ -147,19 +147,30 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Train a model using keras')
-    #parser.add_argument('--csvpath', type=str, default='preprocessing/train_cifar10.csv', 
-    #                    help='csv location for the training set csv file')
-    #parser.add_argument('--valcsvpath', type=str, default='preprocessing/test_cifar10.csv', 
-    #                    help='csv location for the validation set csv file')
-    parser.add_argument('--csvpath', type=str, default='preprocessing/train_tinyImageNet.csv', 
+
+
+
+    #Data set 
+    parser.add_argument('--csvpath', type=str, default='preprocessing/train_cifar10.csv', 
                         help='csv location for the training set csv file')
-    parser.add_argument('--valcsvpath', type=str, default='preprocessing/val_tinyImageNet.csv', 
+    parser.add_argument('--valcsvpath', type=str, default='preprocessing/test_cifar10.csv', 
                         help='csv location for the validation set csv file')
+
+    #parser.add_argument('--csvpath', type=str, default='preprocessing/train_tinyImageNet.csv', 
+    #                    help='csv location for the training set csv file')
+    #parser.add_argument('--valcsvpath', type=str, default='preprocessing/val_tinyImageNet.csv', 
+    #                    help='csv location for the validation set csv file')
+
+
+
+    #epochs, batch_size and model ID
     parser.add_argument('--epochs', type=str, default='5', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
    
+    
+    #arguments from the parser
     csvpath = args.csvpath
     valcsvpath = args.valcsvpath
     epochs = int(args.epochs)
@@ -167,6 +178,6 @@ if __name__ == "__main__":
     mid = args.mid
     
     #run the model
-    run(csvpath=csvpath,valcsvpath=valcsvpath,epochs=epochs,batch_size=batch_size,mid=mid, target_size=(64,64))
+    run(csvpath=csvpath,valcsvpath=valcsvpath,epochs=epochs,batch_size=batch_size,mid=mid)
     
     

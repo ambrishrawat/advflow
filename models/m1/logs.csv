@@ -1,3 +1,0 @@
-Epoch,5
-Batch size,50
-Optimisation,"sgd = SGD(lr=5.e-4, decay=1.e-6,  nesterov=False)"

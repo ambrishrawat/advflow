@@ -15,17 +15,18 @@ def run(csv_location,batch_size,mid):
  
     #define the batch generator   (validation set)
     val_datagen = CSVGenerator(csv_location=csv_location,
-                                 batch_size=batch_size)
+                                 batch_size=batch_size,
+                                 target_size=(32,32))
     
     val_generator = val_datagen.batch_gen()
 
     # load json and create model
-    json_file = open('models/'+mid+'.json', 'r')
+    json_file = open('models/'+mid+'/model_arch.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json)
     # load weights into new model
-    model.load_weights("models/"+mid+".h5")
+    model.load_weights("models/"+mid+"/snap_e80.h5")
     print("Loaded model from disk")
  
     # evaluate loaded model on test data
@@ -44,8 +45,8 @@ def run(csv_location,batch_size,mid):
     
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description='Train VGG19 on tinyimagenet using keras')
-    parser.add_argument('--csvpath', type=str, default='preprocessing/valset.csv', help='batch size')
+    parser = argparse.ArgumentParser(description='Compute accuracy of image classification given a model and a set of images')
+    parser.add_argument('--csvpath', type=str, default='preprocessing/train_cifar10.csv', help='batch size')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
