@@ -113,8 +113,8 @@ else:
 
 
 model_json = model.to_json()
-with open("model_gpu.json", "w") as json_file:
+with open("models/model_gpu2.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("model_gpu.h5")
+model.save_weights("models/model_gpu2.h5")
 print("Saved model to disk")
