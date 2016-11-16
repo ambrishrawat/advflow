@@ -141,16 +141,12 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
     #predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
     predictions = model(x)
 
-    '''
+    ''' 
     pred_argmax = tf.argmax(predictions, 1, name="predictions")
     correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
-
-    #self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+    accuracy = 0.0
+    accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
     learning_phase = 0
-    outputs = [correct_predictions]
-    out = []
-    for _ in outputs:
-        out.append([])
     with sess.as_default():
         #time to run the session!!
         samples_seen = 0
@@ -161,10 +157,9 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
             feed_dict[x] = X
             feed_dict[y] = Y
             feed_dict[K.learning_phase()] = learning_phase
-            batch_out = sess.run(outputs,feed_dict = feed_dict)
-            for out_elem, batch_out_ele in zip(out, batch_out):
-                out_elem.append(batch_out_ele)
-    out = list(map(lambda x: np.concatenate(x, axis=0), out))
+            batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
+            accuracy+=batch_out[0]*X.shape[0]
+    accuracy/=nbsamples
     ''' 
     # Define sympbolic for accuracy
     acc_value = keras.metrics.categorical_accuracy(y, predictions)

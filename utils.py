@@ -58,7 +58,7 @@ class CSVGenerator():
                 self.df = pd.read_csv(csv_location)
 
         self.N = self.df.shape[0]
-        print(self.N)
+        print("number of samples loaded",self.N)
         self.batch_size = batch_size
         self.total_batches_seen = 0
         self.index_gen = self._idx_gen(self.N,batch_size,shuffle)
@@ -80,7 +80,6 @@ class CSVGenerator():
                 batch_index += 1
             else:
                 current_batch_size = N - current_index
-                print('Yoda',current_batch_size)
                 batch_index = 0
             self.total_batches_seen += 1
             yield (index_array[current_index: current_index + current_batch_size],

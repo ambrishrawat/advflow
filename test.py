@@ -16,7 +16,7 @@ def run(csv_location,batch_size,mid):
     #define the batch generator   (validation set)
     val_datagen = CSVGenerator(csv_location=csv_location,
                                  batch_size=batch_size,
-                                 target_size=(32,32))
+                                 nbsamples=1000)
     
     val_generator = val_datagen.batch_gen()
 
@@ -32,7 +32,7 @@ def run(csv_location,batch_size,mid):
     model.load_weights("models/"+mid+"/snap_e80.h5")
     print("Loaded model from disk")
     '''
-
+    '''
     # load json and create model
     json_file = open('models/model_gpu4.json', 'r')
     loaded_model_json = json_file.read()
@@ -41,9 +41,9 @@ def run(csv_location,batch_size,mid):
     # load weights into new model
     model.load_weights("models/model_gpu4.h5")
     print("Loaded model from disk")
-    
+    '''
     '''Load model and weights together'''
-    #model = load_model('models/cifar10_cnn_keras_weights.hdf5')
+    model = load_model('models/cifar10_cnn_keras_weights.hdf5')
 
     # evaluate loaded model on test data
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])

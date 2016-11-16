@@ -51,10 +51,10 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Generate adversarial images for the validation set of tinyImageNet')
-    parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10.csv', help='batch size')
+    parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10_keras.csv', help='batch size')
     parser.add_argument('--mid', type=str, default='m11', help='model id for saving')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
-    parser.add_argument('--nbsamples', type=str, default='1000', help='total samples')
+    parser.add_argument('--nbsamples', type=str, default='10000', help='total samples')
     parser.add_argument('--epsilon', type=str, default='0.3', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
