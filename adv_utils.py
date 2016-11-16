@@ -2,7 +2,7 @@ import tensorflow as tf
 from keras.backend import categorical_crossentropy
 from keras import backend as K
 import numpy as np
-
+import keras
 
 
 def batch_eval(sess, tf_inputs, tf_outputs, numpy_inputs):
@@ -131,11 +131,12 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
     '''
     Creates and executes ops for stochastic prediction
     '''
-
+    
     #define a placeholder for input images
     x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
     y = tf.placeholder(tf.float32, shape=(None, 10))
 
+    
     #define the computation graph
     #predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
     predictions = model(x)
@@ -145,26 +146,56 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
     correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
 
     #self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
-
-    outputs = [predictions, correct_predictions]
+    learning_phase = 0
+    outputs = [correct_predictions]
     out = []
     for _ in outputs:
         out.append([])
     with sess.as_default():
         #time to run the session!!
         samples_seen = 0
-        while samples_seen <= nbsamples:
-            X,_ = generator.__next__()
+        while samples_seen < nbsamples:
+            X,Y = generator.__next__()
             samples_seen+=X.shape[0]
             feed_dict = dict()
-            feed_dict[inputs] = X
+            feed_dict[x] = X
+            feed_dict[y] = Y
             feed_dict[K.learning_phase()] = learning_phase
             batch_out = sess.run(outputs,feed_dict = feed_dict)
             for out_elem, batch_out_ele in zip(out, batch_out):
                 out_elem.append(batch_out_ele)
     out = list(map(lambda x: np.concatenate(x, axis=0), out))
-    '''
+    ''' 
+    # Define sympbolic for accuracy
+    acc_value = keras.metrics.categorical_accuracy(y, predictions)
 
+    # Init result var
+    accuracy = 0.0
+
+    with sess.as_default():
+        # Compute number of batches
+
+        samples_seen = 0
+        while samples_seen < nbsamples:
+            X,Y = generator.__next__()
+            samples_seen+=X.shape[0]
+            #feed_dict = dict()
+            #feed_dict[x] = X
+            #feed_dict[y] = Y
+            #feed_dict[K.learning_phase()] = learning_phase
+
+            # The last batch may be smaller than all others, so we need to
+            # account for variable batch size here
+            accuracy += X.shape[0] * acc_value.eval(feed_dict={x: X,
+                                            y: Y,
+                                            keras.backend.learning_phase(): 0})
+
+        # Divide by number of examples to get final value
+        accuracy /= nbsamples
+
+
+  
+    '''
     #execute the the ops in Tf sessions
     out = run_batch_generator(model=model, 
                         generator=generator, 
@@ -172,7 +203,7 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
                         outputs = [predictions],
                         learning_phase = 1,
                         sess=sess, nbsamples = nbsamples)
-
+    '''
     #compute accuracy from the scores obtained output
-    print(out[0].shape)
-    return out
+    print(accuracy)
+    #return out
