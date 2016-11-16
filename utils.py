@@ -48,10 +48,15 @@ class CSVGenerator():
     def __init__(self,csv_location = None,
                  batch_size=32,
                  shuffle=False,
-                 target_size=None):
+                 target_size=None,
+                 nbsamples=None):
         
         if csv_location is not None:
-            self.df = pd.read_csv(csv_location)
+            if nbsamples is not None:
+                self.df = pd.read_csv(csv_location, nrows=nbsamples)
+            else:
+                self.df = pd.read_csv(csv_location)
+
         self.N = self.df.shape[0]
         print(self.N)
         self.batch_size = batch_size
@@ -75,6 +80,7 @@ class CSVGenerator():
                 batch_index += 1
             else:
                 current_batch_size = N - current_index
+                print('Yoda',current_batch_size)
                 batch_index = 0
             self.total_batches_seen += 1
             yield (index_array[current_index: current_index + current_batch_size],

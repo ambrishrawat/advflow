@@ -105,7 +105,7 @@ model.add(Activation('softmax'))
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', class_mode='categorical', metrics = ['accuracy'])
     
-checkpointer = ModelCheckpoint(filepath='cifar10_cnn_keras_weights.hdf5', verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath='models/m1/weights.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
 earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
 
 model.fit_generator(datagen.flow(X_train, Y_train, 
@@ -118,10 +118,10 @@ model.fit_generator(datagen.flow(X_train, Y_train,
 
 from keras.models import model_from_json
 model_json = model.to_json()
-with open("models/model_gpu3.json", "w") as json_file:
+with open("models/model_gpu4.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/model_gpu3.h5")
+model.save_weights("models/model_gpu4.h5")
 print("Saved model to disk")
 
 

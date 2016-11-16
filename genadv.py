@@ -9,6 +9,7 @@ import numpy as np
 import csv
 from keras.models import model_from_json
 from adv_utils import *
+from keras.models import load_model
 
 
 
@@ -18,7 +19,7 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
  
     #define the batch generator (validation set)
     val_datagen = CSVGenerator(csv_location=csv_location,
-                                 batch_size=batch_size)
+                                 batch_size=batch_size, nbsamples=nbsamples)
     
     val_generator = val_datagen.batch_gen()
 
@@ -29,11 +30,12 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
     #json_file.close()
     #model = model_from_json(loaded_model_json)
     
-    model = cifar_keras()
-    # load weights into new model
-    model.load_weights("models/"+mid+"/snap_e60.h5")
-    print("Loaded model from disk")
- 
+    #model = cifar_keras()
+    ## load weights into new model
+    #model.load_weights("models/"+mid+"/snap_e60.h5")
+    #print("Loaded model from disk")
+    model = load_model('models/cifar10_cnn_keras_weights.hdf5')
+
     # compile the loaded model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
@@ -68,6 +70,8 @@ if __name__ == "__main__":
 
     import tensorflow as tf
     sess = tf.Session()
+
+    # It is IMPORTANT that the session is passed here, becuase the new computation graph will be added in the seession
 
     from keras import backend as K
     K.set_session(sess)

@@ -54,7 +54,7 @@ def run_batch_generator(model=None,
                         learning_phase = None,
                         sess=None, nbsamples = None):
     '''
-    Executes the computation graph on batches obtained from generator 
+    Executes any computation graph on batches obtained from generator 
     Returned the specified output
     '''
     out = []
@@ -63,7 +63,7 @@ def run_batch_generator(model=None,
     with sess.as_default():
         #time to run the session!!
         samples_seen = 0
-        while samples_seen <= nbsamples:
+        while samples_seen < nbsamples:
             X,_ = generator.__next__()
             samples_seen+=X.shape[0]
             feed_dict = dict()
@@ -72,6 +72,7 @@ def run_batch_generator(model=None,
             batch_out = sess.run(outputs,feed_dict = feed_dict)
             for out_elem, batch_out_ele in zip(out, batch_out):
                 out_elem.append(batch_out_ele)
+        print('Total samples seen', samples_seen)
     out = list(map(lambda x: np.concatenate(x, axis=0), out))
     return out
 
@@ -136,7 +137,33 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
     y = tf.placeholder(tf.float32, shape=(None, 10))
 
     #define the computation graph
-    predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
+    #predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
+    predictions = model(x)
+
+    '''
+    pred_argmax = tf.argmax(predictions, 1, name="predictions")
+    correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
+
+    #self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+
+    outputs = [predictions, correct_predictions]
+    out = []
+    for _ in outputs:
+        out.append([])
+    with sess.as_default():
+        #time to run the session!!
+        samples_seen = 0
+        while samples_seen <= nbsamples:
+            X,_ = generator.__next__()
+            samples_seen+=X.shape[0]
+            feed_dict = dict()
+            feed_dict[inputs] = X
+            feed_dict[K.learning_phase()] = learning_phase
+            batch_out = sess.run(outputs,feed_dict = feed_dict)
+            for out_elem, batch_out_ele in zip(out, batch_out):
+                out_elem.append(batch_out_ele)
+    out = list(map(lambda x: np.concatenate(x, axis=0), out))
+    '''
 
     #execute the the ops in Tf sessions
     out = run_batch_generator(model=model, 
@@ -146,5 +173,6 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
                         learning_phase = 1,
                         sess=sess, nbsamples = nbsamples)
 
+    #compute accuracy from the scores obtained output
     print(out[0].shape)
     return out
