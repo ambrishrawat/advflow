@@ -43,13 +43,15 @@ datagen = ImageDataGenerator(
     horizontal_flip=True,
     vertical_flip=False)
 
+'''
 batch = 0
 for X_batch, y_batch in datagen.flow(X_train, y_train, batch_size=2048):
     print(batch, end='...', flush=True)
     X_train = np.vstack((X_train, X_batch))
     y_train = np.vstack((y_train, y_batch))
     batch += 1
-    
+'''
+
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
@@ -70,22 +72,22 @@ X_test /= 255
 
 model = Sequential()
 
-model.add(Convolution2D(32, 3, 3, border_mode='full',
-                        input_shape=(img_channels, img_rows, img_cols)))
+model.add(Convolution2D(32, 3, 3,border_mode = 'same',
+                        input_shape=( img_rows, img_cols, img_channels)))
 model.add(LeakyReLU(alpha=0.2))
 model.add(Convolution2D(32, 3, 3))
 model.add(LeakyReLU(alpha=0.2))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.2))
 
-model.add(Convolution2D(64, 3, 3, border_mode='full'))
+model.add(Convolution2D(64, 3,3,border_mode = 'same' ))
 model.add(LeakyReLU(alpha=0.2))
 model.add(Convolution2D(64, 3, 3))
 model.add(LeakyReLU(alpha=0.2))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.3))
 
-model.add(Convolution2D(128, 3, 3, border_mode='full'))
+model.add(Convolution2D(128, 3, 3, border_mode = 'same'))
 model.add(LeakyReLU(alpha=0.2))
 model.add(Convolution2D(128, 3, 3))
 model.add(LeakyReLU(alpha=0.2))
@@ -101,13 +103,14 @@ model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 
 
-model.compile(loss='categorical_crossentropy', optimizer='adam', class_mode='categorical')
+model.compile(loss='categorical_crossentropy', optimizer='adam', class_mode='categorical', metrics = ['accuracy'])
     
 checkpointer = ModelCheckpoint(filepath='cifar10_cnn_keras_weights.hdf5', verbose=1, save_best_only=True)
 earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
 
-model.fit(X_train, Y_train, 
-          batch_size=batch_size, 
+model.fit_generator(datagen.flow(X_train, Y_train, 
+          batch_size=batch_size), 
+          samples_per_epoch=2*X_train.shape[0],
           nb_epoch=nb_epoch, 
           show_accuracy=True,
           validation_data=(X_test, Y_test),
