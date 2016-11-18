@@ -24,7 +24,6 @@ def run(specs):
     ''' load dataset, define generators'''
     c = Cifar_npy_gen(batch_size=specs['batch_size'])
 
-
     ''' Standard Dropouts '''
     metrics_ = model.evaluate_generator(
        generator = c.test_gen,
@@ -42,7 +41,20 @@ def run(specs):
 
 
     print("mc-dropout(acc): %.2f%%" % (mc_acc*100))
-    
+
+    """logging"""
+    logfilename = "models/" + specs['save_id'] + "/acc.txt"
+    with open(logfilename, mode='w') as logfile:
+        for key in sorted(list(specs.keys())):
+            value = specs[key]
+            print("{}: {}".format(key, value))
+            logfile.write("{}: {}\n".format(key, value))
+            logfile.flush()
+        
+        logfile.write("std-dropout(acc): %.2f%% \n" % (metrics_[1]*100))
+        logfile.write("mc-dropout(acc): %.2f%% \n" % (mc_acc*100))
+
+
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Accuracy for CIFAR test set on LeNet architectures with std_droput and mc_dropout interprations')
@@ -60,17 +72,15 @@ if __name__ == "__main__":
     batch_size = int(args.batchsize)
     mid = args.mid
 
-    model = lenet_alldrop
+    model = lenet_ipdrop
     specs = {
             'model': model,
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100
-            }
+            } 
 
-
- 
-    #run the model
+    #compute the accuracy for the model
     run(specs)
     
     
