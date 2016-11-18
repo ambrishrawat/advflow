@@ -11,34 +11,20 @@ from keras.models import model_from_json
 from adv_utils import *
 from keras.models import load_model
 
-
-
-def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
      
+def run(specs):
+
+
+    '''Load model and weights together'''
+    model = load_model('models/'+specs['save_id']+'/model.hdf5')
+
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+
+    ''' load dataset, define generators'''
+    c = Cifar_npy_gen(batch_size=specs['batch_size'])
 
  
-    #define the batch generator (validation set)
-    val_datagen = CSVGenerator(csv_location=csv_location,
-                                 batch_size=batch_size, nbsamples=nbsamples)
-    
-    val_generator = val_datagen.batch_gen()
-
-    # load json and create model
-
-    #json_file = open('models/'+mid+'/model_arch.json', 'r')
-    #loaded_model_json = json_file.read()
-    #json_file.close()
-    #model = model_from_json(loaded_model_json)
-    
-    #model = cifar_keras()
-    ## load weights into new model
-    #model.load_weights("models/"+mid+"/snap_e60.h5")
-    #print("Loaded model from disk")
-    model = load_model('models/cifar10_cnn_keras_weights.hdf5')
-
-    # compile the loaded model
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    
     #fgsm_generator(model=model, generator=val_generator, nbsamples=nbsamples,
     #               epsilon=epsilon,savedir=savedir,sess=sess)
 
@@ -50,11 +36,7 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
     
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description='Generate adversarial images for the validation set of tinyImageNet')
-    parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10_keras.csv', help='batch size')
-    parser.add_argument('--mid', type=str, default='m11', help='model id for saving')
-    parser.add_argument('--batchsize', type=str, default='64', help='batch size')
-    parser.add_argument('--nbsamples', type=str, default='10000', help='total samples')
+    parser = argparse.ArgumentParser(description='Generate adversarial images and save the numpy arrays')
     parser.add_argument('--epsilon', type=str, default='0.3', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
@@ -76,13 +58,18 @@ if __name__ == "__main__":
     from keras import backend as K
     K.set_session(sess)
     
+    #arguments from the parser
+    batch_size = int(args.batchsize)
+    mid = args.mid
+
+    model = lenet_ipdrop
+    specs = {
+            'model': model,
+            'batch_size': batch_size,
+            'save_id': model.__name__,
+            'T': 100
+            } 
+
     #run
-    run(csv_location=csv_location,
-        batch_size=batch_size, 
-        nbsamples=nbsamples,
-        mid=mid, 
-        epsilon=epsilon,
-        savedir=savedir,
-        sess=sess)
-    
-    
+    run(specs)
+

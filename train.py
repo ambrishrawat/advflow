@@ -17,12 +17,12 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 def run(specs):
     
     ''' Make the mid directory '''
-    directory = 'models/'+specs['save_id']
+    directory = os.path.join(specs['work_dir'],specs['save_id'])
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     """logging"""
-    logfilename = "models/" + specs['save_id'] + "/log.txt"
+    logfilename = os.path.join(specs['work_dir'],specs['save_id'],"log.txt")
     with open(logfilename, mode='w') as logfile:
         for key in sorted(list(specs.keys())):
             value = specs[key]
@@ -39,7 +39,7 @@ def run(specs):
 
     '''callbacks'''
     checkpointer = ModelCheckpoint(
-            filepath='models/'+specs['save_id']+'/model_.hdf5', 
+            filepath=os.path.join(specs['work_dir'],specs['save_id'],'model_.hdf5'), 
             verbose=1, 
             save_best_only=True)
 
@@ -50,7 +50,7 @@ def run(specs):
     ''' save the final model'''
     # serialize model to JSON
     model_json = model.to_json()
-    with open("models/"+specs['save_id']+"/model_arch.json", "w") as json_file:
+    with open(os.path.join(specs['work_dir'],specs['save_id'],"model_arch.json"), "w") as json_file:
         json_file.write(model_json)
     
 
@@ -75,22 +75,21 @@ if __name__ == "__main__":
     #epochs, batch_size and model ID
     parser.add_argument('--epochs', type=str, default='200', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
-    parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
    
     
     #arguments from the parser
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
-    mid = args.mid
     
-    model = lenet_alldrop
+    model = small_lenet_alldrop
     specs = {
             'model': model,
             'epochs': epochs,
             'batch_size': batch_size,
             'save_id': model.__name__,
-            'optimisation': 'adam'
+            'optimisation': 'adam',
+            'work_dir': '/u/ambrish/models'
             }
 
             

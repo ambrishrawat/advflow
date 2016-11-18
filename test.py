@@ -61,16 +61,11 @@ if __name__ == "__main__":
 
     parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10.csv', help='batch size')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
-    parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()
     
+    #arguments from the parser
     csv_location = args.csvpath
     batch_size = int(args.batchsize)
-    mid = args.mid
-
-    #arguments from the parser
-    batch_size = int(args.batchsize)
-    mid = args.mid
 
     model = lenet_ipdrop
     specs = {

@@ -156,7 +156,7 @@ class Cifar_npy_gen():
             rotation_range=None,
             width_shift_range=None,
             height_shift_range=None,
-            horizontal_flip=False,
+            horizontal_flip=True,
             vertical_flip=False)
 
         self.Y_train = np_utils.to_categorical(y_train, nb_classes)
@@ -171,7 +171,19 @@ class Cifar_npy_gen():
         self.train_gen = datagen.flow(self.X_train, self.Y_train,
                           batch_size=batch_size)
 
-        self.test_gen = datagen.flow(self.X_test, self.Y_test,
+        datagen2 = ImageDataGenerator(
+            featurewise_center=False,
+            samplewise_center=False,
+            featurewise_std_normalization=False,
+            samplewise_std_normalization=False,
+            zca_whitening=False,
+            rotation_range=None,
+            width_shift_range=None,
+            height_shift_range=None,
+            horizontal_flip=False,
+            vertical_flip=False)
+
+        self.test_gen = datagen2.flow(self.X_test, self.Y_test,
                           batch_size=batch_size)
 
 
