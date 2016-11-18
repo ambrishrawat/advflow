@@ -107,6 +107,76 @@ class CSVGenerator():
 
 
 
+def load_cifar_as_numpy():
+    '''
+    Load the cifar set as numpy arrays
+    '''
+    train_datagen = CSVGenerator(csv_location='./../adversarial/preprocessing/train_cifar10.csv',
+                                     batch_size=10,shuffle=True,
+                                     nbsamples=None)
+
+    train_generator = train_datagen.batch_gen()
+    X_train_,Y_train_ = train_generator.__next__()
+
+    val_datagen = CSVGenerator(csv_location='./../adversarial/preprocessing/test_cifar10.csv',
+                                     batch_size=10,
+                                     nbsamples=None)
+
+    val_generator = val_datagen.batch_gen()
+    X_test_,Y_test_ = val_generator.__next__()
+
+
+
+    return (X_train_,Y_train_),(X_test_,Y_test_)
+
+
+
+class Cifar_npy_gen():
+
+    def __init__(self,batch_size=64):
+        '''
+        Using keras generators
+        '''
+        from keras.datasets import cifar10
+        from keras.preprocessing.image import ImageDataGenerator
+        from keras.utils import np_utils, generic_utils
+
+
+        nb_classes = 10
+        
+        # the data, shuffled and split between tran and test sets
+        (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+        
+        datagen = ImageDataGenerator(
+            featurewise_center=False,
+            samplewise_center=False,
+            featurewise_std_normalization=False,
+            samplewise_std_normalization=False,
+            zca_whitening=False,
+            rotation_range=None,
+            width_shift_range=None,
+            height_shift_range=None,
+            horizontal_flip=False,
+            vertical_flip=False)
+
+        self.Y_train = np_utils.to_categorical(y_train, nb_classes)
+        self.Y_test = np_utils.to_categorical(y_test, nb_classes)
+
+
+        self.X_train = X_train.astype('float32')
+        self.X_test = X_test.astype('float32')
+        self.X_train /= 255
+        self.X_test /= 255
+    
+        self.train_gen = datagen.flow(self.X_train, self.Y_train,
+                          batch_size=batch_size)
+
+        self.test_gen = datagen.flow(self.X_test, self.Y_test,
+                          batch_size=batch_size)
+
+
+
+
 
 
 

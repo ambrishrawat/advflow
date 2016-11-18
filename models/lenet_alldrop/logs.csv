@@ -1,0 +1,15 @@
+Epoch,100
+Batch size,64
+Optimisation,adam = Adam(lr=0.001)
+Epoch,100
+Batch size,64
+Optimisation,adam = Adam(lr=0.001)
+Epoch,100
+Batch size,64
+Optimisation,adam = Adam(lr=0.001)
+Epoch,100
+Batch size,64
+Optimisation,adam = Adam(lr=0.001)
+Epoch,100
+Batch size,64
+Optimisation,adam = Adam(lr=0.001)

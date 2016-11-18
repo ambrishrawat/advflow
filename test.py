@@ -31,7 +31,7 @@ def run(csv_location,batch_size,mid):
     model.load_weights("models/"+mid+"/snap_e80.h5")
     print("Loaded model from disk")
     '''
-    
+    '''
     # load json and create model
     json_file = open('models/model_gpu.json', 'r')
     loaded_model_json = json_file.read()
@@ -40,9 +40,9 @@ def run(csv_location,batch_size,mid):
     # load weights into new model
     model.load_weights("models/model_gpu.h5")
     print("Loaded model from disk")
-    
+    '''
     '''Load model and weights together'''
-    #model = load_model('models/cifar10_cnn_keras_weights.hdf5')
+    model = load_model('models/mipython_alldrop/model.hdf5')
 
     # evaluate loaded model on test data
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
