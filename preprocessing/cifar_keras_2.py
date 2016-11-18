@@ -16,6 +16,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 import numpy as np
 
+from utils import *
 
 batch_size = 64
 nb_classes = 10
@@ -40,7 +41,7 @@ datagen = ImageDataGenerator(
     rotation_range=None,
     width_shift_range=None,
     height_shift_range=None,
-    horizontal_flip=True,
+    horizontal_flip=False,
     vertical_flip=False)
 
 '''
@@ -68,6 +69,7 @@ X_test = X_test.astype('float32')
 X_train /= 255
 X_test /= 255
 
+(X_train_,Y_train_),(X_test_,Y_test_) = load_cifar_as_numpy()
 
 
 model = Sequential()
@@ -78,21 +80,21 @@ model.add(LeakyReLU(alpha=0.2))
 model.add(Convolution2D(32, 3, 3))
 model.add(LeakyReLU(alpha=0.2))
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.2))
+#model.add(Dropout(0.2))
 
 model.add(Convolution2D(64, 3,3,border_mode = 'same' ))
 model.add(LeakyReLU(alpha=0.2))
 model.add(Convolution2D(64, 3, 3))
 model.add(LeakyReLU(alpha=0.2))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.3))
+#model.add(Dropout(0.3))
 
-model.add(Convolution2D(128, 3, 3, border_mode = 'same'))
-model.add(LeakyReLU(alpha=0.2))
-model.add(Convolution2D(128, 3, 3))
-model.add(LeakyReLU(alpha=0.2))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.4))
+#model.add(Convolution2D(128, 3, 3, border_mode = 'same'))
+#model.add(LeakyReLU(alpha=0.2))
+#model.add(Convolution2D(128, 3, 3))
+#model.add(LeakyReLU(alpha=0.2))
+#model.add(MaxPooling2D(pool_size=(2, 2)))
+#model.add(Dropout(0.4))
 
 model.add(Flatten())
 model.add(Dense(512))
@@ -102,26 +104,28 @@ model.add(Dropout(0.5))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 
+from model_defs import *
+model = lenet_alldrop()
 
-model.compile(loss='categorical_crossentropy', optimizer='adam', class_mode='categorical', metrics = ['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics = ['accuracy'])
     
-checkpointer = ModelCheckpoint(filepath='models/m1/weights.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
+#checkpointer = ModelCheckpoint(filepath='models/mipython_alldrop/weights.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
 earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+checkpointer = ModelCheckpoint(filepath='models/mipython_alldrop/model.hdf5', verbose=1, save_best_only=True)
 
 model.fit_generator(datagen.flow(X_train, Y_train, 
           batch_size=batch_size), 
-          samples_per_epoch=2*X_train.shape[0],
+          samples_per_epoch=X_train.shape[0],
           nb_epoch=nb_epoch, 
-          show_accuracy=True,
-          validation_data=(X_test, Y_test),
+          validation_data=(X_test_, Y_test_),
           callbacks=[checkpointer, earlystopping])
 
 from keras.models import model_from_json
 model_json = model.to_json()
-with open("models/model_gpu4.json", "w") as json_file:
+with open("models/mipython_alldrop/model_arch.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("models/model_gpu4.h5")
+model.save_weights("models/mipython_alldrop/model_weights.h5")
 print("Saved model to disk")
 
 

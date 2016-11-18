@@ -31,7 +31,6 @@ from keras.layers.advanced_activations import LeakyReLU, PReLU, ParametricSoftpl
 import h5py 
 from keras.applications.vgg16 import VGG16
 
-
 def cifar_ipython():
     model = Sequential()
 
@@ -67,26 +66,66 @@ def cifar_ipython():
 
     return model
 
-def cifar_keras():
+def lenet_nodrop():
+   
     model = Sequential()
 
-    model.add(Convolution2D(32, 3, 3, border_mode='same',
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
                             input_shape=(32,32,3)))
     model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
-    model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
     
-    model.add(Convolution2D(64, 3, 3, border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3))
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
     
     model.add(Flatten())
-    model.add(Dense(512))
+    model.add(Dense(1000))
+    model.add(Activation('relu'))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+   
+    return model
+
+
+def lenet_ipdrop():
+
+    model = Sequential()
+
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
+                            input_shape=(32,32,3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Flatten())
+    model.add(Dense(1000))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+   
+    return model
+
+def lenet_alldrop():
+    model = Sequential()
+
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
+                            input_shape=(32,32,3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.5))
+    
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.5))
+    
+    model.add(Flatten())
+    model.add(Dense(1000))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(10))
