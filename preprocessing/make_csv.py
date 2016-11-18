@@ -38,6 +38,9 @@ class tinyImageNet(object):
     
                 c_idx = 0
                 for class_ in self.classes:
+                    '''
+                    BUG!! - if you iterate by classes then, the corresponsing training will be biased
+                    '''
                     class_path = os.path.join(self.fpath,'train',class_,'images')
                     images_ = listdir(class_path)
                     for image_ in images_:

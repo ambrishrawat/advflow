@@ -1,5 +1,5 @@
 batch_size: 64
-epochs: 100
-model: <function lenet_nodrop at 0x2b13633772f0>
+epochs: 200
+model: <function lenet_nodrop at 0x2acc86c982f0>
 optimisation: adam
 save_id: lenet_nodrop

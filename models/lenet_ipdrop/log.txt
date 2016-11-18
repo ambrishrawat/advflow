@@ -1,5 +1,5 @@
 batch_size: 64
 epochs: 100
-model: <function lenet_ipdrop at 0x7f7c8806f378>
+model: <function lenet_ipdrop at 0x2af4c992d378>
 optimisation: adam
 save_id: lenet_ipdrop

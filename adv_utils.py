@@ -127,7 +127,12 @@ def fgsm_graph(model=None, eps=None):
     return adv_x, x, grad
 
 
-def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_forwards=10, savedir=None, sess=None):
+def mc_dropout_eval(model=None, 
+        generator=None, 
+        nbsamples=None, 
+        num_feed_forwards=10, 
+        sess=None):
+
     '''
     Creates and executes ops for stochastic prediction
     '''
@@ -160,47 +165,8 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
             feed_dict[K.learning_phase()] = learning_phase
             batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
             accuracy+=batch_out[0]*X.shape[0]
-    accuracy/=nbsamples
     
-    '''
-    # Define sympbolic for accuracy
-    acc_value = keras.metrics.categorical_accuracy(y, predictions)
-
-    # Init result var
-    accuracy = 0.0
-
-    with sess.as_default():
-        # Compute number of batches
-
-        samples_seen = 0
-        while samples_seen < nbsamples:
-            X,Y = generator.__next__()
-            samples_seen+=X.shape[0]
-            #feed_dict = dict()
-            #feed_dict[x] = X
-            #feed_dict[y] = Y
-            #feed_dict[K.learning_phase()] = learning_phase
-
-            # The last batch may be smaller than all others, so we need to
-            # account for variable batch size here
-            accuracy += X.shape[0] * acc_value.eval(feed_dict={x: X,
-                                            y: Y,
-                                            keras.backend.learning_phase(): 0})
-
-        # Divide by number of examples to get final value
-        accuracy /= nbsamples
-
-    '''
-  
-    '''
-    #execute the the ops in Tf sessions
-    out = run_batch_generator(model=model, 
-                        generator=generator, 
-                        inputs=x, 
-                        outputs = [predictions],
-                        learning_phase = 1,
-                        sess=sess, nbsamples = nbsamples)
-    '''
+    
     #compute accuracy from the scores obtained output
-    print(accuracy)
-    #return out
+    accuracy/=nbsamples 
+    return accuracy

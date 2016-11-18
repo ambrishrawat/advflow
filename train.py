@@ -39,7 +39,7 @@ def run(specs):
 
     '''callbacks'''
     checkpointer = ModelCheckpoint(
-            filepath='models/'+specs['save_id']+'/model.hdf5', 
+            filepath='models/'+specs['save_id']+'/model_.hdf5', 
             verbose=1, 
             save_best_only=True)
 
@@ -61,7 +61,7 @@ def run(specs):
         nb_epoch=epochs,
         validation_data = c.test_gen,
         nb_val_samples = 10000,
-        callbacks=[checkpointer, earlystopping],
+        callbacks=[checkpointer],
         verbose=1)
  
     pass
@@ -70,10 +70,10 @@ def run(specs):
     
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description='Train a model using keras')
+    parser = argparse.ArgumentParser(description='Training CIFAR example for LeNet architectures')
 
     #epochs, batch_size and model ID
-    parser.add_argument('--epochs', type=str, default='100', help='number of epochs (the program runs through the whole data set)')
+    parser.add_argument('--epochs', type=str, default='200', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
     args = parser.parse_args()

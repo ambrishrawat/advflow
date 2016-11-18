@@ -9,58 +9,44 @@ import numpy as np
 import csv
 from keras.models import model_from_json
 from keras.models import load_model
+import keras
+from adv_utils import *
 
-def run(csv_location,batch_size,mid):
+def run(specs):
      
  
-    #define the batch generator   (validation set)
-    val_datagen = CSVGenerator(csv_location=csv_location,
-                                 batch_size=batch_size)
-    
-    val_generator = val_datagen.batch_gen()
-
-
-    '''Load model and weights seperately'''
-    '''
-    # load json and create model
-    json_file = open('models/'+mid+'/model_arch.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    # load weights into new model
-    model.load_weights("models/"+mid+"/snap_e80.h5")
-    print("Loaded model from disk")
-    '''
-    '''
-    # load json and create model
-    json_file = open('models/model_gpu.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    # load weights into new model
-    model.load_weights("models/model_gpu.h5")
-    print("Loaded model from disk")
-    '''
     '''Load model and weights together'''
-    model = load_model('models/mipython_alldrop/model.hdf5')
+    model = load_model('models/'+specs['save_id']+'/model.hdf5')
 
-    # evaluate loaded model on test data
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    
-    val_loss = model.evaluate_generator(
-       generator = val_generator,
-       val_samples = val_datagen.get_data_size())
+   
+
+    ''' load dataset, define generators'''
+    c = Cifar_npy_gen(batch_size=specs['batch_size'])
+
+
+    ''' Standard Dropouts '''
+    metrics_ = model.evaluate_generator(
+       generator = c.test_gen,
+       val_samples = 10000)
  
-    print("%s: %.2f%%" % (model.metrics_names[1], val_loss[1]*100))
-    print(val_loss)
-
-    pass
+    print("std-dropout(acc): %.2f%%" % (metrics_[1]*100))
 
 
+    ''' MC - Dropouts '''
+    mc_acc = mc_dropout_eval(model=model, 
+            generator=c.test_gen, 
+            nbsamples=10000, 
+            num_feed_forwards=specs['T'], 
+            sess=keras.backend.get_session())
+
+
+    print("mc-dropout(acc): %.2f%%" % (mc_acc*100))
     
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description='Compute accuracy of image classification given a model and a set of images')
+    parser = argparse.ArgumentParser(description='Accuracy for CIFAR test set on LeNet architectures with std_droput and mc_dropout interprations')
+
     parser.add_argument('--csvpath', type=str, default='preprocessing/test_cifar10.csv', help='batch size')
     parser.add_argument('--batchsize', type=str, default='50', help='batch size')
     parser.add_argument('--mid', type=str, default='m1', help='model id for saving')
@@ -69,8 +55,22 @@ if __name__ == "__main__":
     csv_location = args.csvpath
     batch_size = int(args.batchsize)
     mid = args.mid
+
+    #arguments from the parser
+    batch_size = int(args.batchsize)
+    mid = args.mid
+
+    model = lenet_alldrop
+    specs = {
+            'model': model,
+            'batch_size': batch_size,
+            'save_id': model.__name__,
+            'T': 100
+            }
+
+
  
     #run the model
-    run(csv_location=csv_location,batch_size=batch_size,mid=mid)
+    run(specs)
     
     
