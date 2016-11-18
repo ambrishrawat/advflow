@@ -39,7 +39,7 @@ def run(specs):
 
     '''callbacks'''
     checkpointer = ModelCheckpoint(
-            filepath='models/'+specs['save_id']+'model.hdf5', 
+            filepath='models/'+specs['save_id']+'/model.hdf5', 
             verbose=1, 
             save_best_only=True)
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     batch_size = int(args.batchsize)
     mid = args.mid
     
-    model = lenet_nodrop
+    model = lenet_alldrop
     specs = {
             'model': model,
             'epochs': epochs,
