@@ -43,7 +43,7 @@ def run(csv_location,batch_size,nbsamples,mid,epsilon,savedir,sess):
     #               epsilon=epsilon,savedir=savedir,sess=sess)
 
     stochastic_prediction(model=model, generator=val_generator, nbsamples=nbsamples,
-                   num_feed_forwards=10,savedir=savedir,sess=sess)
+                   num_feed_forwards=1000,savedir=savedir,sess=sess)
     pass
 
 

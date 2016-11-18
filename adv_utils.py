@@ -138,15 +138,16 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
 
     
     #define the computation graph
-    #predictions = tf.concat(0,[[model(x)] for _ in range(num_feed_forwards)])
-    predictions = model(x)
+    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
+    mc_approx = tf.reduce_mean(predictions,0)
+    #predictions = model(x)
 
-    ''' 
-    pred_argmax = tf.argmax(predictions, 1, name="predictions")
+    
+    pred_argmax = tf.argmax(mc_approx, 1, name="predictions")
     correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
     accuracy = 0.0
     accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
-    learning_phase = 0
+    learning_phase = 1
     with sess.as_default():
         #time to run the session!!
         samples_seen = 0
@@ -160,7 +161,8 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
             batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
             accuracy+=batch_out[0]*X.shape[0]
     accuracy/=nbsamples
-    ''' 
+    
+    '''
     # Define sympbolic for accuracy
     acc_value = keras.metrics.categorical_accuracy(y, predictions)
 
@@ -188,7 +190,7 @@ def stochastic_prediction(model=None, generator=None, nbsamples=None, num_feed_f
         # Divide by number of examples to get final value
         accuracy /= nbsamples
 
-
+    '''
   
     '''
     #execute the the ops in Tf sessions

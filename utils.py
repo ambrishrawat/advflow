@@ -101,8 +101,8 @@ class CSVGenerator():
                 img = np.rollaxis(img, 2, 1).reshape(nimg, ch, h, w)
 
             #Convert to float as most pretrained models are trained on this
-            img = img.astype('float32')
-            img /= 255
+            #img = img.astype('float32')
+            #img /= 255
             yield img,lab
 
 

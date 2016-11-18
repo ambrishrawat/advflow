@@ -10,7 +10,7 @@ import csv
 from keras.callbacks import Callback
 import time
 from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
-
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 class ForEveryEpoch(Callback):
 
     def __init__(self,valcsvpath=None,mid=None,target_size=None):
@@ -75,7 +75,7 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
     '''define the optimiser and compile'''
     #model = VGG_16_pretrain_2()
     #model = VGG_16_pretrain_1(weights_path='./models/vgg16_weights.h5')
-    model = cifar_keras()
+    model = cifar_ipython()
     #opt = SGD(lr=0.0065, decay=1e-6, momentum=0.9, nesterov=True)
     opt = SGD(lr=5.e-3, decay=1.e-6, nesterov=False)
     #opt = RMSprop(lr=0.0001)
@@ -90,7 +90,11 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
     #opt_tag = 'adam = Adam(lr=0.001)'
     #opt_tag = 'adagrad= Adagrad(lr=0.001)'
 
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metric=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', class_mode='categorical', metrics=['accuracy'])
+
+    checkpointer = ModelCheckpoint(filepath='models/'+mid+'/weights.{epoch:02d}-{val_loss:.2f}.hdf5', verbose=1, save_best_only=True)
+    earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+
  
     '''define the batch generator   (training set)'''
     train_datagen = CSVGenerator(csv_location=csvpath,
@@ -100,14 +104,14 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
     train_generator = train_datagen.batch_gen()
     
     '''define the batch generator   (validation set)'''
-    #val_datagen = CSVGenerator(csv_location='preprocessing/valset.csv',
-    #                             batch_size=batch_size)
-    #
-    #val_generator = val_datagen.batch_gen()
+    val_datagen = CSVGenerator(csv_location=valcsvpath,
+                                 batch_size=batch_size)
+    
+    val_generator = val_datagen.batch_gen()
 
 
     '''callback for epochs'''
-    cEpochs = ForEveryEpoch(valcsvpath=valcsvpath,mid=mid,target_size=target_size)
+    #cEpochs = ForEveryEpoch(valcsvpath=valcsvpath,mid=mid,target_size=target_size)
 
 
     # serialize model to JSON
@@ -130,7 +134,7 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
 
 
     '''call fit_generartor'''
-    model.fit_generator(
+    '''model.fit_generator(
         generator=train_generator,
         samples_per_epoch=train_datagen.get_data_size(),
         #samples_per_epoch=,
@@ -139,7 +143,19 @@ def run(csvpath,valcsvpath,epochs,batch_size,mid, target_size=None):
         #validation_data = val_generator,
         #nb_val_samples = val_datagen.get_data_size(),
         verbose=1)
-   
+    '''
+
+    '''call fit_generartor'''
+    model.fit_generator(
+        generator=train_generator,
+        samples_per_epoch=train_datagen.get_data_size(),
+        #samples_per_epoch=,
+        nb_epoch=epochs,
+        validation_data = val_generator,
+        nb_val_samples = val_datagen.get_data_size(),
+        callbacks=[checkpointer, earlystopping],
+        verbose=1)
+ 
     pass
 
 
