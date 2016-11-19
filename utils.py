@@ -13,6 +13,12 @@ import skimage
 from skimage import io
 import keras
 
+
+from keras.datasets import cifar10
+from keras.preprocessing.image import ImageDataGenerator
+from keras.utils import np_utils, generic_utils
+
+
 def load_img(img_filename):
     """
     Load image from the filename. Default is to load in color if
@@ -137,9 +143,6 @@ class Cifar_npy_gen():
         '''
         Using keras generators
         '''
-        from keras.datasets import cifar10
-        from keras.preprocessing.image import ImageDataGenerator
-        from keras.utils import np_utils, generic_utils
 
 
         nb_classes = 10
@@ -184,7 +187,42 @@ class Cifar_npy_gen():
             vertical_flip=False)
 
         self.test_gen = datagen2.flow(self.X_test, self.Y_test,
-                          batch_size=batch_size)
+                          batch_size=batch_size,
+                          shuffle=False)
+
+
+def return_gen(X,Y,batch_size):
+    
+    datagen = ImageDataGenerator(
+            featurewise_center=False,
+            samplewise_center=False,
+            featurewise_std_normalization=False,
+            samplewise_std_normalization=False,
+            zca_whitening=False,
+            rotation_range=None,
+            width_shift_range=None,
+            height_shift_range=None,
+            horizontal_flip=False,
+            vertical_flip=False)
+
+    return datagen.flow(X, Y,
+                      batch_size=batch_size,
+                      shuffle=False)
+
+
+def save_npy(np_array = None,
+        specs = None,
+        ):
+    '''
+    Save numpy array given the specifications
+    '''
+
+    ''' Make the mid directory '''
+    directory = os.path.join(specs['work_dir'],specs['save_id'])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    np.save(os.path.join(directory,specs['file_id']),np_array) 
 
 
 

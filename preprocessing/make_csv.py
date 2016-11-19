@@ -14,6 +14,8 @@ from pathlib import Path
 import _pickle as cPickle
 from scipy.misc import imsave
 
+from utils import *
+
 ''' Class for preprocessing tinyImageNet dataset '''
 
 class tinyImageNet(object):
@@ -474,6 +476,41 @@ class cifar10_keras(object):
         self.make_test_csv(valcsv='test_cifar10_keras.csv')
 
 
+class cifar10_np_save(object):
+    '''
+    Preprocessing the data set and making AdvFlow compatible csv files for CIFAR10
+    Also, saves the JPEGs for the trianing and test set which facilitates
+    easy visualisation of adversarial images
+    '''
+    
+    
+    def __init__(self):
+        
+        # the data, shuffled and split between train and test sets
+        (self.X_train, self.y_train), (self.X_test, self.y_test) = cifar10.load_data()
+        print('X_train shape:', self.X_train.shape)
+        print(self.y_train.shape, 'train samples')
+        print(self.y_test.shape, 'test samples')
+
+        # convert class vectors to binary class matrices
+        self.Y_train = np_utils.to_categorical(self.y_train, nb_classes)
+        self.Y_test = np_utils.to_categorical(self.y_test, nb_classes)
+
+        self.X_train = self.X_train.astype('float32')
+        self.X_test = self.X_test.astype('float32')
+        self.X_train /= 255
+        self.X_test /= 255
+
+        self.classes = 10
+
+        # save the numpy arrays
+
+        work_dir = '/u/ambrish/nparrays'
+        save_npy(self.X_train, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'X_train'} ) 
+        save_npy(self.Y_train, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'Y_train'} ) 
+        save_npy(self.X_test, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'X_test'} ) 
+        save_npy(self.Y_test, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'Y_test'} ) 
+
 
 
 if __name__ == "__main__":
@@ -489,6 +526,8 @@ if __name__ == "__main__":
 
     #tset = tinyImageNet(fpath)
     #tset = cifar10(source_path=fpath,dest_path=cifarpath)
-    tset = cifar10_keras(dest_path=cifarpath)
+    #tset = cifar10_keras(dest_path=cifarpath)
 
-    tset.make_csvs()
+
+    #tset.make_csvs()
+    c = cifar10_np_save()

@@ -76,23 +76,22 @@ def run_batch_generator(model=None,
     out = list(map(lambda x: np.concatenate(x, axis=0), out))
     return out
 
-def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, savedir=None, sess=None):
+def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, sess=None):
     '''
     creates and executes the adv_x ops on image batches obtained from generator
     '''
+
+
     adv_x,x,predictions = fgsm_graph(model, eps=epsilon)
      
     out = run_batch_generator(model=model, 
                         generator=generator, 
                         inputs=x, 
-                        outputs = [adv_x],
+                        outputs = [adv_x, predictions],
                         learning_phase = 0,
                         sess=sess, nbsamples = nbsamples)
     print(out[0].shape)
-    
-    ''' TODO: sabe the adv in a specified location; make a wrapper over this function'''
-    return out[0]
-    #X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
+    return out[0], out[1]
 
 def fgsm_graph(model=None, eps=None):
     '''
@@ -105,6 +104,8 @@ def fgsm_graph(model=None, eps=None):
 
     #define the computation graph
     predictions = model(x)
+
+    ''' Loss for the predicted label '''
 
     #compute loss
     y = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 1, keep_dims=True))) #compare with its max
@@ -124,7 +125,7 @@ def fgsm_graph(model=None, eps=None):
     adv_x = tf.stop_gradient(x + scaled_signed_grad)
 
 
-    return adv_x, x, grad
+    return adv_x, x, y
 
 
 def mc_dropout_eval(model=None, 
@@ -170,3 +171,50 @@ def mc_dropout_eval(model=None,
     #compute accuracy from the scores obtained output
     accuracy/=nbsamples 
     return accuracy
+
+
+def mc_dropout_mean(model=None, 
+        generator=None, 
+        nbsamples=None, 
+        num_feed_forwards=10, 
+        sess=None):
+
+    '''
+    Creates and executes ops for stochastic prediction
+    '''
+    
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
+
+    
+    #define the computation graph
+    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
+    mc_approx = tf.reduce_mean(predictions,0)
+    #predictions = model(x)
+
+    
+    pred_argmax = tf.argmax(mc_approx, 1, name="predictions")
+    correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
+    accuracy = 0.0
+    accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+    learning_phase = 1
+    with sess.as_default():
+        #time to run the session!!
+        samples_seen = 0
+        while samples_seen < nbsamples:
+            X,Y = generator.__next__()
+            samples_seen+=X.shape[0]
+            feed_dict = dict()
+            feed_dict[x] = X
+            feed_dict[y] = Y
+            feed_dict[K.learning_phase()] = learning_phase
+            batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
+            accuracy+=batch_out[0]*X.shape[0]
+    
+    
+    #compute accuracy from the scores obtained output
+    accuracy/=nbsamples 
+    return accuracy
+
+

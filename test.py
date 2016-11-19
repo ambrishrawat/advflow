@@ -16,7 +16,7 @@ def run(specs):
      
  
     '''Load model and weights together'''
-    model = load_model('models/'+specs['save_id']+'/model.hdf5')
+    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'))
 
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
    
@@ -43,7 +43,7 @@ def run(specs):
     print("mc-dropout(acc): %.2f%%" % (mc_acc*100))
 
     """logging"""
-    logfilename = "models/" + specs['save_id'] + "/acc.txt"
+    logfilename = os.path.join(specs['work_dir'],specs['save_id'],'acc.txt')
     with open(logfilename, mode='w') as logfile:
         for key in sorted(list(specs.keys())):
             value = specs[key]
@@ -72,7 +72,8 @@ if __name__ == "__main__":
             'model': model,
             'batch_size': batch_size,
             'save_id': model.__name__,
-            'T': 100
+            'T': 100,
+            'work_dir':'models'
             } 
 
     #compute the accuracy for the model
