@@ -61,7 +61,7 @@ def run(specs):
         nb_epoch=epochs,
         validation_data = c.test_gen,
         nb_val_samples = 10000,
-        callbacks=[checkpointer],
+        callbacks=[checkpointer,earlystopping],
         verbose=1)
  
     pass
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = small_lenet_alldrop
+    model = keras_eg_ipdrop
     specs = {
             'model': model,
             'epochs': epochs,
