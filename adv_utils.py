@@ -203,7 +203,7 @@ def mc_dropout_stats(model=None,
     temp = temp / tf.reduce_sum(temp, 2, keep_dims=True) #normalise
     temp = tf.reduce_sum(temp,0) #reduce sum across T feed forwards
     temp = tf.reduce_max(temp,1)
-
+    #computed the frequency of mode (exact ratio can be computed as 1 - f_m/N)
 
     learning_phase = 1
     outputs = [predictions, mean_along_y,std_dev_along_y, temp]

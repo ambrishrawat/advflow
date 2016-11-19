@@ -39,7 +39,7 @@ def run(specs):
 
     '''callbacks'''
     checkpointer = ModelCheckpoint(
-            filepath=os.path.join(specs['work_dir'],specs['save_id'],'model_.hdf5'), 
+            filepath=os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'), 
             verbose=1, 
             save_best_only=True)
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = keras_eg_ipdrop
+    model = small_lenet_nodrop
     specs = {
             'model': model,
             'epochs': epochs,
