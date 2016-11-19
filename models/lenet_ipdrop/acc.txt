@@ -1,7 +1,7 @@
 T: 100
 batch_size: 50
-model: <function lenet_ipdrop at 0x7fb2d0093a60>
+model: <function lenet_ipdrop at 0x7f0e8007db70>
 save_id: lenet_ipdrop
 work_dir: models
-std-dropout(acc): 55.04% 
-mc-dropout(acc): 53.33% 
+std-dropout(acc): 70.86% 
+mc-dropout(acc): 68.07% 

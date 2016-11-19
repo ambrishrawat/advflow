@@ -1,5 +1,7 @@
 T: 100
 batch_size: 50
-model: <function lenet_alldrop at 0x2abb590158c8>
+model: <function lenet_alldrop at 0x7f0e8007dbf8>
 save_id: lenet_alldrop
-std-dropout(acc): 76.52%mc-dropout(acc): 67.07%
+work_dir: models
+std-dropout(acc): 76.52% 
+mc-dropout(acc): 67.09% 

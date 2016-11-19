@@ -79,4 +79,26 @@ if __name__ == "__main__":
     #compute the accuracy for the model
     run(specs)
     
+    model = lenet_nodrop
+    specs = {
+            'model': model,
+            'batch_size': batch_size,
+            'save_id': model.__name__,
+            'T': 100,
+            'work_dir':'models'
+            } 
+
+    #compute the accuracy for the model
+    run(specs)
     
+    model = lenet_alldrop
+    specs = {
+            'model': model,
+            'batch_size': batch_size,
+            'save_id': model.__name__,
+            'T': 100,
+            'work_dir':'models'
+            } 
+
+    #compute the accuracy for the model
+    run(specs)
