@@ -368,7 +368,7 @@ def VGG_16add_pretrain():
     # note: when there is a complete match between your model definition
     # and your weight savefile, you can simply call model.load_weights(filename)
     #assert os.path.exists(weights_path), 'Model weights not found (see "weights_path" variable in script).'
-    f = h5py.File('models/vgg16_weights.h5')
+    f = h5py.File('models/samples/vgg16_weights.h5')
     for k in range(f.attrs['nb_layers']):
         if k >= len(model.layers):
             # we don't look at the last (fully-connected) layers in the savefile
@@ -382,7 +382,7 @@ def VGG_16add_pretrain():
     # build a classifier model to put on top of the convolutional model
     top_model = Sequential()
     top_model.add(Flatten(input_shape=model.output_shape[1:]))
-    top_model.add(Dense(256, activation='relu'))
+    top_model.add(Dense(512, activation='relu'))
     top_model.add(Dropout(0.5))
     top_model.add(Dense(200, activation='softmax'))
 
@@ -420,7 +420,7 @@ def VGG_16_pretrain_2():
     return model
 
 
-def VGG_16_pretrain_1(trainable=False, weights_path = None):
+def VGG_16_pretrain_1(trainable=False, weights_path = 'models/samples/vgg16_weights.h5'):
 
     '''
     VGG_16 model with pre-trained weights for all convolutional blocks
@@ -494,6 +494,9 @@ def VGG_16_pretrain_1(trainable=False, weights_path = None):
             model.layers[k].set_weights(weights)
         f.close()
         print('Model loaded.')
+
+    for layer in model.layers:
+        layer.trainable = False
 
     model.add(Flatten())
     model.add(Dense(1024, activation='relu', name='dense_1', trainable=True))
