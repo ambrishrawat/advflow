@@ -484,7 +484,7 @@ class cifar10_np_save(object):
     '''
     
     
-    def __init__(self):
+    def __init__(self, work_dir):
         
         # the data, shuffled and split between train and test sets
         (self.X_train, self.y_train), (self.X_test, self.y_test) = cifar10.load_data()
@@ -505,11 +505,10 @@ class cifar10_np_save(object):
 
         # save the numpy arrays
 
-        work_dir = '/u/ambrish/nparrays'
-        save_npy(self.X_train, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'X_train'} ) 
-        save_npy(self.Y_train, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'Y_train'} ) 
-        save_npy(self.X_test, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'X_test'} ) 
-        save_npy(self.Y_test, specs = {'work_dir': work_dir, 'save_id': 'orig', 'file_id': 'Y_test'} ) 
+        save_npy(self.X_train, specs = {'work_dir': work_dir, 'save_id': 'train', 'file_id': 'img'} ) 
+        save_npy(self.Y_train, specs = {'work_dir': work_dir, 'save_id': 'train', 'file_id': 'label'} ) 
+        save_npy(self.X_test, specs = {'work_dir': work_dir, 'save_id': 'test', 'file_id': 'img'} ) 
+        save_npy(self.Y_test, specs = {'work_dir': work_dir, 'save_id': 'test', 'file_id': 'label'} ) 
 
 
 
@@ -529,5 +528,6 @@ if __name__ == "__main__":
     #tset = cifar10_keras(dest_path=cifarpath)
 
 
+    work_dir = '/u/ambrish/nparrays'
     #tset.make_csvs()
-    c = cifar10_np_save()
+    c = cifar10_np_save(work_dir = work_dir)

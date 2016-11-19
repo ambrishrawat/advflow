@@ -1,30 +1,36 @@
 #AdvFlow
 
 A library over TensorFlow and Keras to experimnent with Adversarial Images.
-Examples included for tiny-ImageNet and CIFAR-10 data sets.
+Examples included for CIFAR-10 data sets.
 
 ##Installation
 Add repository to your PYTHONPATH
+**Requirements**: tensorflow, keras
 
 ##Preprocessing the data sets
-For preprocessing run the following command from the preproceesing folder
 ```
-./make_csv.py --fpath='<path to>/tiny-imagenet-200/'
+./preprcessing/load_npy.py (-h for help)
 ```
-or
-```
-./make_csv.py --fpath='<path to>/cifar-10-batches-py/' --cifarpath='<destination path for saving JPEGs>'
-```
+
 ##Training
+
+Different model defintions from model_defs.py can be trained using this script. 
+
 ```
-./train.py -h (for help)
-./train.py --epochs=100 --batchsize=128 --mid=madam100_128
+./train.py (-h for help)
 ```
 
 ##Testing
+Trained models can be evaluated with std-droput and mc-dropput interpretaions
 ```
-./test.py -h (for help)
-./test.py --csvpath=preprocessing/valset.csv --batchsize=128 --mid=madam100_128
+./test.py (-h for help)
 ```
+
+##Generate adversrial images
+Adversrial images for the the CIFAR10 images can be generated and saved using this script
+```
+./genadv.py (-h for help)
+```
+
 
 
