@@ -71,7 +71,6 @@ def run_batch_generator(generator=None,
             batch_out = sess.run(outputs,feed_dict = feed_dict)
             for out_elem, batch_out_ele in zip(out, batch_out):
                 out_elem.append(batch_out_ele)
-        print('Total samples seen', samples_seen)
     out = list(map(lambda x: np.concatenate(x, axis=0), out))
     return out
 
@@ -193,7 +192,7 @@ def fgsm_graph_away(model=None, eps=None):
     return adv_x, x, y
 
 
-def mc_dropout_eval(model=None, 
+def mc_dropout_preds(model=None, 
         generator=None, 
         nbsamples=None, 
         num_feed_forwards=10, 
@@ -203,6 +202,76 @@ def mc_dropout_eval(model=None,
     Creates and executes ops for stochastic prediction
     '''
     
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    
+    #define the computation graph
+    predictions = model(x) 
+
+    stochs = []
+    for _ in range(num_feed_forwards):
+        out = run_batch_generator(generator=generator, 
+                            inputs=x, 
+                            outputs = [predictions],
+                            learning_phase = 1,
+                            sess=sess, nbsamples = nbsamples)
+        stochs.append(out[0])
+
+    return np.asarray(stochs)
+
+def mc_dropout_eval_helper(labels=None,stoch_preds=None, sess=None):
+
+    y = tf.placeholder(tf.float32, shape=(labels.shape[0],10))
+    predictions = tf.placeholder(tf.float32, shape=(stoch_preds.shape[0],labels.shape[0],10))
+    mc_approx = tf.reduce_mean(predictions,0)
+
+    pred_argmax = tf.argmax(mc_approx, 1, name="predictions")
+    correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
+    accuracy = 0.0
+    accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+    learning_phase = 0
+    with sess.as_default():
+        #time to run the session!!
+        feed_dict = dict()
+        feed_dict[y] = labels
+        feed_dict[predictions] = stoch_preds
+        feed_dict[K.learning_phase()] = learning_phase
+        batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
+        accuracy+=batch_out[0]
+    
+    
+    #compute accuracy from the scores obtained output
+    return accuracy
+
+def mc_dropout_eval(model=None, 
+        generator=None, 
+        nbsamples=None, 
+        num_feed_forwards=10, 
+        sess=None,
+        labels=None):
+
+
+    preds = mc_dropout_preds(model=model, 
+        generator=generator, 
+        nbsamples=nbsamples, 
+        num_feed_forwards=num_feed_forwards, 
+        sess=sess)
+
+    return mc_dropout_eval_helper(labels=labels[0:nbsamples],stoch_preds=preds, sess=sess)
+
+
+def mc_dropout_eval_depricated(model=None, 
+        generator=None, 
+        nbsamples=None, 
+        num_feed_forwards=10, 
+        sess=None):
+
+    '''
+    NOTE: tf.pack makes a copy of the same tf vairable and hence model(x) is not executed n times
+
+    TODO: try by adding to collection
+    '''
+
     #define a placeholder for input images
     x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
     y = tf.placeholder(tf.float32, shape=(None, 10))
@@ -238,7 +307,7 @@ def mc_dropout_eval(model=None,
     return accuracy
 
 
-def mc_dropout_stats(model=None, 
+def mc_dropout_stats_depricated(model=None, 
         generator=None, 
         nbsamples=None, 
         num_feed_forwards=10, 
@@ -295,4 +364,53 @@ def mc_dropout_stats(model=None,
     return out[0],out[1],out[2], out[3]
     
 
+def mc_dropout_stats_helper(labels=None,stoch_preds=None, sess=None):
 
+    y = tf.placeholder(tf.float32, shape=(labels.shape[0],10))
+    predictions = tf.placeholder(tf.float32, shape=(stoch_preds.shape[0],labels.shape[0],10))
+    mc_approx = tf.reduce_mean(predictions,0)
+    #predictions = model(x)
+
+    #multiply mc_approx by y to get (confidence for label y) 
+    mean_along_y = tf.reduce_max(tf.mul(mc_approx,y), 1, keep_dims = True)
+
+    #std dev (a measure of uncertainity in confidence for label y))
+    e_xx = tf.reduce_mean(tf.mul(predictions,predictions),0) 
+    std_dev_along_y = tf.sqrt(tf.sub(tf.mul(mc_approx,mc_approx),e_xx))
+
+    #variational ratio
+    temp = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 2, keep_dims=True))) #compare with its max
+    temp = temp / tf.reduce_sum(temp, 2, keep_dims=True) #normalise
+    temp = tf.reduce_sum(temp,0) #reduce sum across T feed forwards
+    temp = tf.reduce_max(temp,1)
+    
+    outputs = [mean_along_y,std_dev_along_y, temp]
+
+    with sess.as_default():
+        #time to run the session!!
+        feed_dict = dict()
+        feed_dict[y] = labels
+        feed_dict[predictions] = stoch_preds
+        feed_dict[K.learning_phase()] = 0
+        out = sess.run(outputs,feed_dict = feed_dict)
+         
+    return out
+
+
+def mc_dropout_stats(model=None, 
+        generator=None, 
+        nbsamples=None, 
+        num_feed_forwards=10, 
+        sess=None,
+        labels=None):
+
+    preds = mc_dropout_preds(model=model, 
+        generator=generator, 
+        nbsamples=nbsamples, 
+        num_feed_forwards=num_feed_forwards, 
+        sess=sess)
+
+    out = mc_dropout_stats_helper(labels=labels[0:nbsamples],stoch_preds=preds, sess=sess)
+
+    mc_acc = mc_dropout_eval_helper(labels=labels[0:nbsamples],stoch_preds=preds, sess=sess)
+    return preds, out[0], out[1], out[2], mc_acc

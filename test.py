@@ -22,24 +22,38 @@ def run(specs):
    
 
     ''' load dataset, define generators'''
-    c = Cifar_npy_gen(batch_size=specs['batch_size'])
+    c = Cifar_npy_gen()
 
+    '''Generator'''
+    test_ = NPYGenerator(img_npy=c.X_test,
+            label_npy=c.Y_test,
+            batch_size=specs['batch_size'],
+            nbsamples=specs['nbsamples'])
+    test_gen = test_.batch_gen()
+
+    
     ''' Standard Dropouts '''
+    
     metrics_ = model.evaluate_generator(
-       generator = c.test_gen,
-       val_samples = 10000)
+       generator = test_gen,
+       val_samples = specs['nbsamples'])
  
     print("std-dropout(acc): %.2f%%" % (metrics_[1]*100))
-
+    
     # to rest the generator
-    c = Cifar_npy_gen(batch_size=specs['batch_size'])
+    test_ = NPYGenerator(img_npy=c.X_test,
+            label_npy=c.Y_test,
+            batch_size=specs['batch_size'],
+            nbsamples=specs['nbsamples'])
+    test_gen = test_.batch_gen()
 
     ''' MC - Dropouts '''
     mc_acc = mc_dropout_eval(model=model, 
-            generator=c.test_gen, 
-            nbsamples=10000, 
+            generator= test_gen, 
+            nbsamples=specs['nbsamples'], 
             num_feed_forwards=specs['T'], 
-            sess=keras.backend.get_session())
+            sess=keras.backend.get_session(),
+            labels=c.Y_test)
 
 
     print("mc-dropout(acc): %.2f%%" % (mc_acc*100))
@@ -69,37 +83,40 @@ if __name__ == "__main__":
     csv_location = args.csvpath
     batch_size = int(args.batchsize)
 
-    model = keras_eg_ipdrop
+    model = lenet_ipdrop
     specs = {
             'model': model,
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models'
+            'work_dir':'/u/ambrish/models',
+            'nbsamples':10000
             } 
 
     #compute the accuracy for the model
     run(specs)
     
-    model = keras_eg_nodrop
+    model = lenet_alldrop
     specs = {
             'model': model,
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models'
+            'work_dir':'/u/ambrish/models',
+            'nbsamples':10000
             } 
 
     #compute the accuracy for the model
     run(specs)
     
-    model = keras_eg_alldrop
+    model = lenet_nodrop
     specs = {
             'model': model,
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models'
+            'work_dir':'/u/ambrish/models',
+            'nbsamples':10000
             } 
 
     #compute the accuracy for the model
