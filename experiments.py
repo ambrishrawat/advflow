@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # It is IMPORTANT that the session is passed here, becuase the new computation graph will be added in the seession
     
 
-    model = keras_eg_alldrop
+    model = lenet_norelu_alldrop
     specs = {
             'batch_size': 200,
             'save_id': model.__name__,
@@ -135,3 +135,29 @@ if __name__ == "__main__":
     #run
     run(specs)
 
+    model = lenet_alldrop
+    specs = {
+            'batch_size': 200,
+            'save_id': model.__name__,
+            'nbsamples':10000,
+            'epsilon':epsilon,
+            'T':100,
+            'work_dir':'/u/ambrish/models'
+            } 
+
+    #run
+    run(specs)
+
+
+    model = lenet_ipdrop
+    specs = {
+            'batch_size': 200,
+            'save_id': model.__name__,
+            'nbsamples':10000,
+            'epsilon':epsilon,
+            'T':100,
+            'work_dir':'/u/ambrish/models'
+            } 
+
+    #run
+    run(specs)
