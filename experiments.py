@@ -25,15 +25,16 @@ def run(specs):
     var_ratio_e = []
     mc_acc_e = []
     std_acc_e = []
+    mean_stddr_e = []
     save_adv_e = []
     stoch_preds_e = []
     epsilon = 0.0 
-    '''
+    
     with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
         writer = csv.writer(csvfile, delimiter='\t')
         writer.writerow(['e','mean','std','var_ratio','mc_acc','std_acc'])
-    '''
-    while epsilon <=specs['epsilon'] :
+    
+    while epsilon < specs['epsilon'] :
 
         '''Load dataset and define generators'''
         c = Cifar_npy_gen(batch_size=specs['batch_size'])
@@ -44,26 +45,26 @@ def run(specs):
                 nbsamples=specs['nbsamples'],
                 epsilon=epsilon,
                 sess=keras.backend.get_session())
-      
+     
+        ''' MC - droput stats'''
 
         stoch_preds,means_,stds_, f_m,mc_acc = mc_dropout_stats(model=model,
-        #stoch_preds= mc_dropout_preds(model=model,
                 generator=return_gen(adv,predictions,batch_size=specs['batch_size']),
                 nbsamples=specs['nbsamples'],
                 num_feed_forwards=specs['T'],
                 sess=keras.backend.get_session(),
                 labels=predictions)
 
-
+        #update variation ratio
         f_m = 1.0 - f_m/specs['T']
-        #compute from stoch_preds and predictions
-        #stats_(stoch_preds = stoch_preds, predictions= predictions)
         
-        ''' Std - accuracy '''
+        ''' Std - dropout stats '''
 
-        metrics_ = model.evaluate_generator(
-               generator = return_gen(adv,predictions,batch_size=specs['batch_size']),
-               val_samples = specs['nbsamples'])
+        mean_stddr, std_acc = std_dropout_stats(model=model,
+                generator=return_gen(adv,predictions,batch_size=specs['batch_size']),
+                nbsamples=specs['nbsamples'],
+                sess=keras.backend.get_session(),
+                labels=predictions)
 
         with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'a') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t')
@@ -72,30 +73,36 @@ def run(specs):
                 np.mean(stds_),
                 np.mean(f_m),
                 mc_acc,
-                metrics_[1]])
+                np.mean(mean_stddr),
+                std_acc])
         
         
         epsilon += 0.001
         print('epsilon:',epsilon) 
-        
+       
+        #append arrays
         mean_e.append(np.mean(means_))
         std_e.append(np.mean(stds_))
         var_ratio_e.append(np.mean(f_m)) 
         mc_acc_e.append(mc_acc)
-        std_acc_e.append(metrics_[1])
-        save_adv_e.append(adv)
+        std_acc_e.append(std_acc)
+        mean_stddr_e.append(np.mean(mean_stddr))
+        #save_adv_e.append(adv)
         stoch_preds_e.append(stoch_preds)
         e.append(epsilon)
     
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'mean_e'),mean_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_e'),std_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'var_ratio_e'),var_ratio_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'mc_acc_e'),mc_acc_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_acc_e'),std_acc_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'e'),e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
-    np.save(os.path.join(specs['work_dir'],specs['save_id'],'stoch_preds_e'),stoch_preds_e)
+        #save appended arrays
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'mean_e'),mean_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_e'),std_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'var_ratio_e'),var_ratio_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'mc_acc_e'),mc_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_acc_e'),std_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'mean_stddr_e'),mean_stddr_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'e'),e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stoch_preds_e'),stoch_preds_e)
 
+        #TODO: save after every 5 iterations
+        #np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
 
 
 if __name__ == "__main__":

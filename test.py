@@ -82,6 +82,8 @@ if __name__ == "__main__":
     #arguments from the parser
     csv_location = args.csvpath
     batch_size = int(args.batchsize)
+    work_dir = 'models'
+    nbsamples = 10000
 
     model = lenet_ipdrop
     specs = {
@@ -89,8 +91,8 @@ if __name__ == "__main__":
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models',
-            'nbsamples':10000
+            'work_dir':work_dir,
+            'nbsamples':nbsamples
             } 
 
     #compute the accuracy for the model
@@ -102,7 +104,7 @@ if __name__ == "__main__":
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models',
+            'work_dir':work_dir,
             'nbsamples':10000
             } 
 
@@ -115,8 +117,8 @@ if __name__ == "__main__":
             'batch_size': batch_size,
             'save_id': model.__name__,
             'T': 100,
-            'work_dir':'/u/ambrish/models',
-            'nbsamples':10000
+            'work_dir':work_dir,
+            'nbsamples':nbsamples
             } 
 
     #compute the accuracy for the model
