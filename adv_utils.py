@@ -81,7 +81,7 @@ def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, ses
     '''
 
 
-    adv_x,x,predictions = fgsm_graph(model, eps=epsilon)
+    adv_x,x,predictions = fgsm_graph_away(model, eps=epsilon)
      
     out = run_batch_generator(generator=generator, 
                         inputs=x, 
@@ -91,7 +91,74 @@ def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, ses
     print(out[0].shape)
     return out[0], out[1]
 
-def fgsm_graph(model=None, eps=None):
+def fgsm_generator_towards(model=None, 
+        towards_labels = None, 
+        generator=None, 
+        nbsamples=None, 
+        epsilon=None, 
+        sess=None):
+
+    '''
+    creates and executes the adv_x ops on image batches obtained from generator
+    '''
+
+    adv_x,x,y = fgsm_graph_towards(model, eps=epsilon)
+     
+    outputs = [adv_x]
+    out = []
+    for _ in outputs:
+        out.append([])
+    with sess.as_default():
+        #time to run the session!!
+        samples_seen = 0
+        while samples_seen < nbsamples:
+            X,_ = generator.__next__()
+            samples_seen+=X.shape[0]
+            feed_dict = dict()
+            feed_dict[x] = X
+            feed_dict[y] = towards_labels
+            feed_dict[K.learning_phase()] = learning_phase
+            batch_out = sess.run(outputs,feed_dict = feed_dict) 
+            for out_elem, batch_out_ele in zip(out, batch_out):
+                out_elem.append(batch_out_ele)
+
+    out = list(map(lambda x: np.concatenate(x, axis=0), out))
+    
+    return out[0]
+
+
+def fgsm_graph_towards(model=None, eps=None):
+    '''
+    Creates adv_x ops 
+    '''
+
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
+    #define the computation graph
+    predictions = model(x)
+
+    ''' Loss for the predicted label '''
+
+    #compute loss
+    loss = tf.reduce_mean(categorical_crossentropy(y, predictions))
+    
+    # Define gradient of loss wrt input
+    grad, = tf.gradients(loss, x)
+
+    # Take sign of gradient
+    signed_grad = tf.sign(grad)
+
+    # Multiply by constant epsilon
+    scaled_signed_grad = eps * signed_grad
+
+    # Add perturbation to original example to obtain adversarial example
+    adv_x = tf.stop_gradient(x + scaled_signed_grad)
+
+
+    return adv_x, x, y
+
+def fgsm_graph_away(model=None, eps=None):
     '''
     Creates adv_x ops 
     '''

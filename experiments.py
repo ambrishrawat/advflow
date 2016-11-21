@@ -99,7 +99,7 @@ def run(specs):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Generate adversarial images and save the numpy arrays')
-    parser.add_argument('--epsilon', type=str, default='0.001', help='epsilon for FastGradientSign method')
+    parser.add_argument('--epsilon', type=str, default='0.01', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
     
