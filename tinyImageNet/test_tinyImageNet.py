@@ -22,22 +22,26 @@ def run(specs):
    
 
     ''' load dataset, define generators'''
-    c = Cifar_npy_gen(batch_size=specs['batch_size'])
+    c_test = CSVGenerator(csv_location = 'preprocessing/val_tinyImageNet.csv',
+            batch_size = specs['batch_size'])
+    test_gen = c_test.batch_gen()
+
 
     ''' Standard Dropouts '''
     metrics_ = model.evaluate_generator(
-       generator = c.test_gen,
-       val_samples = 10000)
+       generator = test_gen,
+       val_samples = c_test.N)
  
     print("std-dropout(acc): %.2f%%" % (metrics_[1]*100))
 
-    # to rest the generator
-    c = Cifar_npy_gen(batch_size=specs['batch_size'])
 
+    c_test = CSVGenerator(csv_location = 'preprocessing/val_tinyImageNet.csv',
+            batch_size = specs['batch_size'])
+    test_gen = c_test.batch_gen()
     ''' MC - Dropouts '''
     mc_acc = mc_dropout_eval(model=model, 
-            generator=c.test_gen, 
-            nbsamples=10000, 
+            generator=test_gen, 
+            nbsamples=c_test.N, 
             num_feed_forwards=specs['T'], 
             sess=keras.backend.get_session())
 
@@ -68,8 +72,10 @@ if __name__ == "__main__":
     #arguments from the parser
     csv_location = args.csvpath
     batch_size = int(args.batchsize)
+    if keras.backend.image_dim_ordering() != 'th':
+        keras.backend.set_image_dim_ordering('th')
 
-    model = keras_eg_ipdrop
+    model = VGG_16_pretrain_2
     specs = {
             'model': model,
             'batch_size': batch_size,
@@ -79,28 +85,4 @@ if __name__ == "__main__":
             } 
 
     #compute the accuracy for the model
-    run(specs)
-    
-    model = keras_eg_nodrop
-    specs = {
-            'model': model,
-            'batch_size': batch_size,
-            'save_id': model.__name__,
-            'T': 100,
-            'work_dir':'/u/ambrish/models'
-            } 
-
-    #compute the accuracy for the model
-    run(specs)
-    
-    model = keras_eg_alldrop
-    specs = {
-            'model': model,
-            'batch_size': batch_size,
-            'save_id': model.__name__,
-            'T': 100,
-            'work_dir':'/u/ambrish/models'
-            } 
-
-    #compute the accuracy for the model
-    run(specs)
+    run(specs) 

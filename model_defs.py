@@ -206,6 +206,67 @@ def cifar_ipython():
 
     return model
 
+def lenet_norelu_nodrop():
+   
+    model = Sequential()
+
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
+                            input_shape=(32,32,3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Flatten())
+    model.add(Dense(1000))
+    model.add(Activation('relu'))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+   
+    return model
+
+
+def lenet_norelu_ipdrop():
+
+    model = Sequential()
+
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
+                            input_shape=(32,32,3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+    model.add(Flatten())
+    model.add(Dense(1000))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+   
+    return model
+
+def lenet_norelu_alldrop():
+    model = Sequential()
+
+    model.add(Convolution2D(192, 5, 5, border_mode='same',
+                            input_shape=(32,32,3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.5))
+    
+    model.add(Convolution2D(192, 5, 5, border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.5))
+    
+    model.add(Flatten())
+    model.add(Dense(1000))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+   
+    return model
+
 def lenet_nodrop():
    
     model = Sequential()

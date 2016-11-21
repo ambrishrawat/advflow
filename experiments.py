@@ -15,7 +15,7 @@ import keras
 def run(specs):
 
     '''Load model and weights together'''
-    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model_.hdf5'))
+    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
     
@@ -25,7 +25,7 @@ def run(specs):
     var_ratio_e = []
     mc_acc_e = []
     std_acc_e = []
-
+    save_adv = []
     epsilon = 0.0 
 
     with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
@@ -84,7 +84,7 @@ def run(specs):
         mc_acc_e.append(mc_acc)
         epsilon += 0.0001
         std_acc_e.append(metrics_[1])
-        
+        save_adv.append(adv)
         e.append(epsilon)
 
     np.save(os.path.join(specs['work_dir'],specs['save_id'],'mean_e'),mean_e)
@@ -93,12 +93,13 @@ def run(specs):
     np.save(os.path.join(specs['work_dir'],specs['save_id'],'mc_acc_e'),mc_acc_e)
     np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_acc_e'),std_acc_e)
     np.save(os.path.join(specs['work_dir'],specs['save_id'],'e'),e)
+    np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv'),save_adv)
 
 
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Generate adversarial images and save the numpy arrays')
-    parser.add_argument('--epsilon', type=str, default='0.02', help='epsilon for FastGradientSign method')
+    parser.add_argument('--epsilon', type=str, default='0.001', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
     
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     # It is IMPORTANT that the session is passed here, becuase the new computation graph will be added in the seession
     
 
-    model = small_lenet_alldrop
+    model = keras_eg_alldrop
     specs = {
             'batch_size': 200,
             'save_id': model.__name__,

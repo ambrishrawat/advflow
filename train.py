@@ -63,7 +63,8 @@ def run(specs):
         nb_val_samples = 10000,
         callbacks=[checkpointer,earlystopping],
         verbose=1)
- 
+
+    model.save(os.path.join(specs['work_dir'],specs['save_id'],"model_final.h5"))
     pass
 
 
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = small_lenet_nodrop
+    model = lenet_norelu_nodrop
     specs = {
             'model': model,
             'epochs': epochs,
