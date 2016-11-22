@@ -83,7 +83,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = lenet_norelu_nodrop
+    model = lenet_norelu_ipdrop
     specs = {
             'model': model,
             'epochs': epochs,
