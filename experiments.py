@@ -20,6 +20,7 @@ def run(specs):
     
     
     e = []
+    dist_tr_e = []
     mean_e = []
     std_e = []
     var_ratio_e = []
@@ -28,13 +29,13 @@ def run(specs):
     mean_stddr_e = []
     save_adv_e = []
     stoch_preds_e = []
-    epsilon = 0.0 
+    epsilon = 0.0
     
-    with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
-        writer = csv.writer(csvfile, delimiter='\t')
-        writer.writerow(['e','mean','std','var_ratio','mc_acc','std_acc'])
+    #with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
+    #    writer = csv.writer(csvfile, delimiter='\t')
+    #    writer.writerow(['e','mean','std','var_ratio','mc_acc','std_acc'])
     
-    while epsilon < specs['epsilon'] :
+    while epsilon <= specs['epsilon'] :
 
         '''Load dataset and define generators'''
         c = Cifar_npy_gen(batch_size=specs['batch_size'])
@@ -45,7 +46,10 @@ def run(specs):
                 nbsamples=specs['nbsamples'],
                 epsilon=epsilon,
                 sess=keras.backend.get_session())
-     
+    
+
+        ''' Nearest in training set '''
+        dist_tr_ = nearest_in_set(adv, c.X_train)
         ''' MC - droput stats'''
 
         stoch_preds,means_,stds_, f_m,mc_acc = mc_dropout_stats(model=model,
@@ -65,10 +69,12 @@ def run(specs):
                 nbsamples=specs['nbsamples'],
                 sess=keras.backend.get_session(),
                 labels=predictions)
-
+        print(std_acc)
+        '''
         with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'a') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t')
-            writer.writerow([epsilon, 
+            writer.writerow([epsilon,
+                np.mean(dist_tr_)
                 np.mean(means_),
                 np.mean(stds_),
                 np.mean(f_m),
@@ -76,18 +82,16 @@ def run(specs):
                 np.mean(mean_stddr),
                 std_acc])
         
+         
         
-        epsilon += 0.001
-        print('epsilon:',epsilon) 
-       
         #append arrays
+        dist_tr_e.append(np.mean(dist_tr))
         mean_e.append(np.mean(means_))
         std_e.append(np.mean(stds_))
         var_ratio_e.append(np.mean(f_m)) 
         mc_acc_e.append(mc_acc)
         std_acc_e.append(std_acc)
         mean_stddr_e.append(np.mean(mean_stddr))
-        #save_adv_e.append(adv)
         stoch_preds_e.append(stoch_preds)
         e.append(epsilon)
     
@@ -99,16 +103,20 @@ def run(specs):
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'std_acc_e'),std_acc_e)
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'mean_stddr_e'),mean_stddr_e)
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'e'),e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'dist_tr_e'),dist_tr_e)
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'stoch_preds_e'),stoch_preds_e)
-
+        '''
         #TODO: save after every 5 iterations
-        #np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
+        save_adv_e.append(adv)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
 
+        epsilon += specs['epsilon']
+        print('epsilon:',epsilon) 
 
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Generate adversarial images and save the numpy arrays')
-    parser.add_argument('--epsilon', type=str, default='0.01', help='epsilon for FastGradientSign method')
+    parser.add_argument('--epsilon', type=str, default='0.1', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
     
@@ -122,42 +130,16 @@ if __name__ == "__main__":
     # It is IMPORTANT that the session is passed here, becuase the new computation graph will be added in the seession
     
 
-    model = lenet_norelu_alldrop
+    model = keras_eg_alldrop
     specs = {
-            'batch_size': 200,
+            'batch_size': 20,
             'save_id': model.__name__,
-            'nbsamples':10000,
+            'nbsamples':20,
             'epsilon':epsilon,
-            'T':100,
+            'T':1,
             'work_dir':'/u/ambrish/models'
             } 
 
     #run
     run(specs)
 
-    model = lenet_alldrop
-    specs = {
-            'batch_size': 200,
-            'save_id': model.__name__,
-            'nbsamples':10000,
-            'epsilon':epsilon,
-            'T':100,
-            'work_dir':'/u/ambrish/models'
-            } 
-
-    #run
-    run(specs)
-
-
-    model = lenet_ipdrop
-    specs = {
-            'batch_size': 200,
-            'save_id': model.__name__,
-            'nbsamples':10000,
-            'epsilon':epsilon,
-            'T':100,
-            'work_dir':'/u/ambrish/models'
-            } 
-
-    #run
-    run(specs)

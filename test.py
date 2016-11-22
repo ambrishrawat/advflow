@@ -16,7 +16,7 @@ def run(specs):
      
  
     '''Load model and weights together'''
-    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model_final.hdf5'))
+    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'))
 
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
    
@@ -59,7 +59,7 @@ def run(specs):
     print("mc-dropout(acc): %.2f%%" % (mc_acc*100))
 
     """logging"""
-    logfilename = os.path.join(specs['work_dir'],specs['save_id'],'acc_model_final.txt')
+    logfilename = os.path.join(specs['work_dir'],specs['save_id'],'acc.txt')
     with open(logfilename, mode='w') as logfile:
         for key in sorted(list(specs.keys())):
             value = specs[key]
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     work_dir = '/u/ambrish/models'
     nbsamples = 10000
 
-    model = lenet_norelu_ipdrop
+    model = keras_eg_alldrop
     specs = {
             'model': model,
             'batch_size': batch_size,
@@ -97,6 +97,7 @@ if __name__ == "__main__":
 
     #compute the accuracy for the model
     run(specs)
+    '''
     
     model = lenet_norelu_alldrop
     specs = {
@@ -123,3 +124,4 @@ if __name__ == "__main__":
 
     #compute the accuracy for the model
     run(specs)
+    '''

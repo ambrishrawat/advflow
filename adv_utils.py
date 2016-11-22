@@ -332,7 +332,7 @@ def mc_dropout_stats_depricated(model=None,
 
     #std dev (a measure of uncertainity in confidence for label y))
     e_xx = tf.reduce_mean(tf.mul(predictions,predictions),0) 
-    std_dev_along_y = tf.sqrt(tf.sub(tf.mul(mc_approx,mc_approx),e_xx))
+    std_dev_along_y = tf.sub(tf.mul(mc_approx,mc_approx),e_xx)
 
     #variational ratio
     temp = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 2, keep_dims=True))) #compare with its max
@@ -374,9 +374,9 @@ def mc_dropout_stats_helper(labels=None,stoch_preds=None, sess=None):
     #multiply mc_approx by y to get (confidence for label y) 
     mean_along_y = tf.reduce_max(tf.mul(mc_approx,y), 1, keep_dims = True)
 
-    #std dev (a measure of uncertainity in confidence for label y))
+    #(variance instead of std now) std dev (a measure of uncertainity in confidence for label y))
     e_xx = tf.reduce_mean(tf.mul(predictions,predictions),0) 
-    std_dev_along_y = tf.sqrt(tf.sub(e_xx,tf.mul(mc_approx,mc_approx)))
+    std_dev_along_y = tf.sub(e_xx,tf.mul(mc_approx,mc_approx))
 
     #variational ratio
     temp = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 2, keep_dims=True))) #compare with its max
@@ -472,3 +472,17 @@ def std_dropout_stats(model=None,
     #compute accuracy from the scores obtained output
     accuracy/=nbsamples 
     return out[0], accuracy
+
+
+def nearest_in_set(adv, X_train):
+    ''' 
+    Computed the min L2 - distance of each image in adv from X_train
+    '''
+    def dist_(x,y):
+        return np.linalg.norm(x.flatten()-y.flatten())
+
+    def dist_helper(x):
+        return np.min([dist_(x,X_train[i]) for i in range(X_train.shape[0])])
+    
+    return np.asarray([dist_helper(adv[i]) for i in range(adv.shape[0])])
+

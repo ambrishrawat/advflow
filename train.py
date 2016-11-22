@@ -10,7 +10,7 @@ import csv
 from keras.callbacks import Callback
 import time
 from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 
 
 
@@ -45,6 +45,9 @@ def run(specs):
 
     earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
 
+    tboard = TensorBoard(log_dir=os.path.join(specs['work_dir'],specs['save_id'],'logs_tb'),
+            histogram_freq=0, write_graph=False, write_images=False)
+
     c = Cifar_npy_gen(batch_size=specs['batch_size'])
 
     ''' save the final model'''
@@ -53,6 +56,7 @@ def run(specs):
     with open(os.path.join(specs['work_dir'],specs['save_id'],"model_arch.json"), "w") as json_file:
         json_file.write(model_json)
     
+    #Can be replaced by NPYGenerators so that the last batch doesnt roll over the training set
 
     '''call fit_generartor'''
     model.fit_generator(
@@ -61,7 +65,7 @@ def run(specs):
         nb_epoch=epochs,
         validation_data = c.test_gen,
         nb_val_samples = 10000,
-        callbacks=[checkpointer,earlystopping],
+        callbacks=[checkpointer,earlystopping,tboard],
         verbose=1)
 
     model.save(os.path.join(specs['work_dir'],specs['save_id'],"model_final.h5"))
@@ -83,7 +87,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = lenet_norelu_ipdrop
+    model = keras_eg_alldrop
     specs = {
             'model': model,
             'epochs': epochs,

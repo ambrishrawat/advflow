@@ -226,32 +226,6 @@ def save_npy(np_array = None,
 
 
 
-
-
-
-def stats_(stoch_preds, predictions):
-
-    print('Yoda')
-
-    indices_ = np.argmax(predictions,axis=1)
-    means_ = np.array([np.mean(stoch_preds[:][i][indices_[i]]) for i in range(indices_.shape[0])])
-    print('numpy mean',np.mean(means_))
-
-    std_ = np.array([np.std(stoch_preds[:][i][indices_[i]]) for i in range(indices_.shape[0])])
-    print('numpy std',np.mean(std_))
-
-    var_ratio = np.zeros(predictions.shape[0])
-    for i in range(indices_.shape[0]):
-        maxes = np.zeros(10)
-        for j in range(stoch_preds.shape[0]):
-            maxes[np.argmax(stoch_preds[j][i][:])]+=1
-            
-        var_ratio[i] = 1.0 - np.max(maxes)/stoch_preds.shape[0]
-    print('numpy var_ratio',np.mean(var_ratio))
-    pass
-
-
-
 class NPYGenerator():
     '''
     Class for iterating over a NPY array
@@ -313,55 +287,5 @@ class NPYGenerator():
             #img /= 255
             yield img,lab
 
-class NPYGenerator_stochpreds():
-    '''
-    Class for iterating over a NPY array
 
-    TODO
-    add comments
-    '''
-
-    def __init__(self,stoch_preds=None,
-            batch_size=32,
-            nbsamples=None):
-       
-        self.stoch_preds = stoch_preds
-        self.N = self.stoch_preds.shape[1]
-        if nbsamples is not None:
-            self.N = nbsamples
-        self.batch_size = batch_size
-        self.total_batches_seen = 0
-        self.index_gen = self._idx_gen(self.N,batch_size,shuffle)
-
-    def get_data_size(self):
-        return self.N
-
-    def _idx_gen(self,N,batch_size=32,shuffle=False):
-        batch_index = 0
-        while 1:
-            if batch_index == 0:
-                index_array = np.arange(N)
-                if shuffle:
-                    index_array = np.random.permutation(N)
-            current_index = (batch_index * batch_size) % N
-            if N >= current_index + batch_size:
-                current_batch_size = batch_size
-                batch_index += 1
-            else:
-                current_batch_size = N - current_index
-                batch_index = 0
-            self.total_batches_seen += 1
-            yield (index_array[current_index: current_index + current_batch_size],
-                   current_index, current_batch_size)
-
-    def batch_gen(self):
-        while 1:
-            index_array, current_index, current_batch_size = self.index_gen.__next__()
-            stoch_preds = [self.stoch_preds[:,i,:] for i in index_array]            
-            stoch_preds = np.asarray(stoch_preds)
-            stoch_preds = np.swapaxes(stoch_preds,0,1)
-            #Convert to float as most pretrained models are trained on this
-            #img = img.astype('float32')
-            #img /= 255
-            yield stoch_preds
 
