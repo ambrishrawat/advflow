@@ -33,4 +33,12 @@ Adversrial images for the the CIFAR10 images can be generated and saved using th
 ./genadv.py (-h for help)
 ```
 
+## Example of a horse
 
+The epsilon used for FastGradientSign varies from 0.0 (top-left) to 0.01 (bottom-right).
+
+![adv_horse](https://cloud.githubusercontent.com/assets/2141648/20526315/6bfbe28e-b0bb-11e6-85b3-eb6f312af4b5.png)
+
+the noisy pixels vanish when saved as jpeg
+
+![adv_horse](https://cloud.githubusercontent.com/assets/2141648/20526317/6d52952e-b0bb-11e6-8cff-e05c860c62a5.jpg)
