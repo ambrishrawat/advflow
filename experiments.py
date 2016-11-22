@@ -31,9 +31,9 @@ def run(specs):
     stoch_preds_e = []
     epsilon = 0.0
     
-    #with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
-    #    writer = csv.writer(csvfile, delimiter='\t')
-    #    writer.writerow(['e','mean','std','var_ratio','mc_acc','std_acc'])
+    with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'w') as csvfile:
+        writer = csv.writer(csvfile, delimiter='\t')
+        writer.writerow(['e','mean','std','var_ratio','mc_acc','std_acc'])
     
     while epsilon <= specs['epsilon'] :
 
@@ -70,11 +70,11 @@ def run(specs):
                 sess=keras.backend.get_session(),
                 labels=predictions)
         print(std_acc)
-        '''
+        
         with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'a') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t')
             writer.writerow([epsilon,
-                np.mean(dist_tr_)
+                np.mean(dist_tr_),
                 np.mean(means_),
                 np.mean(stds_),
                 np.mean(f_m),
@@ -105,12 +105,12 @@ def run(specs):
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'e'),e)
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'dist_tr_e'),dist_tr_e)
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'stoch_preds_e'),stoch_preds_e)
-        '''
+        
         #TODO: save after every 5 iterations
-        save_adv_e.append(adv)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
+        #save_adv_e.append(adv)
+        #np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
 
-        epsilon += specs['epsilon']
+        epsilon += 0.002
         print('epsilon:',epsilon) 
 
 if __name__ == "__main__":
@@ -132,11 +132,11 @@ if __name__ == "__main__":
 
     model = keras_eg_alldrop
     specs = {
-            'batch_size': 20,
+            'batch_size': 200,
             'save_id': model.__name__,
-            'nbsamples':20,
+            'nbsamples':10000,
             'epsilon':epsilon,
-            'T':1,
+            'T':100,
             'work_dir':'/u/ambrish/models'
             } 
 
