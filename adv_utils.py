@@ -192,6 +192,41 @@ def fgsm_graph_away(model=None, eps=None):
     return adv_x, x, y
 
 
+def stoch_grads(model=None, eps=None):
+    '''
+    Creates stoch_grad ops and executes them
+    '''
+
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
+
+    #define the computation graph
+    predictions = model(x)
+
+    ''' Loss for the predicted label '''
+
+    #compute loss
+    y = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 1, keep_dims=True))) #compare with its max
+    y = y / tf.reduce_sum(y, 1, keep_dims=True) #normalise
+    loss = tf.reduce_mean(categorical_crossentropy(y, predictions))
+    
+    # Define gradient of loss wrt input
+    grad, = tf.gradients(loss, x)
+
+    grads = []
+    for _ in range(num_feed_forwards):
+        out = run_batch_generator(generator=generator, 
+                            inputs=x, 
+                            outputs = [grad],
+                            learning_phase = 1,
+                            sess=sess, nbsamples = nbsamples)
+        grads.append(out[0])
+
+    return np.mean(grads,axis=0)
+    
+
+
 def mc_dropout_preds(model=None, 
         generator=None, 
         nbsamples=None, 

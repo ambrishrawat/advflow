@@ -137,7 +137,7 @@ if __name__ == "__main__":
     # It is IMPORTANT that the session is passed here, becuase the new computation graph will be added in the seession
     
 
-    model = keras_eg_alldrop
+    model = keras_eg_nodrop
     specs = {
             'batch_size': 200,
             'save_id': model.__name__,
