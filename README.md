@@ -37,7 +37,7 @@ Adversrial images for the the CIFAR10 images can be generated and saved using th
 
 The epsilon used for FastGradientSign varies from 0.0 (top-left) to 0.1 (bottom-right).
 
-![adv_horse](https://cloud.githubusercontent.com/assets/2141648/20572249/9d5b3e5a-b1a2-11e6-919b-20b333191e0c.jpg)
+![adv_horse](https://cloud.githubusercontent.com/assets/2141648/20572353/100b5566-b1a3-11e6-9002-efaeb99e32c7.png)
 
 Difference from original-image
 
