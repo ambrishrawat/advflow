@@ -91,7 +91,6 @@ def fgsm_generator(model=None, generator=None, nbsamples=None, epsilon=None, ses
     return out[0], out[1]
 
 def fgsm_generator_towards(model=None, 
-        towards_labels = None, 
         generator=None, 
         nbsamples=None, 
         epsilon=None, 
@@ -111,11 +110,11 @@ def fgsm_generator_towards(model=None,
         #time to run the session!!
         samples_seen = 0
         while samples_seen < nbsamples:
-            X,_ = generator.__next__()
+            X,Y = generator.__next__()
             samples_seen+=X.shape[0]
             feed_dict = dict()
             feed_dict[x] = X
-            feed_dict[y] = towards_labels
+            feed_dict[y] = Y
             feed_dict[K.learning_phase()] = 0
             batch_out = sess.run(outputs,feed_dict = feed_dict) 
             for out_elem, batch_out_ele in zip(out, batch_out):
@@ -152,7 +151,7 @@ def fgsm_graph_towards(model=None, eps=None):
     scaled_signed_grad = eps * signed_grad
 
     # Add perturbation to original example to obtain adversarial example
-    adv_x = tf.stop_gradient(x + scaled_signed_grad)
+    adv_x = tf.stop_gradient(x - scaled_signed_grad)
 
 
     return adv_x, x, y
