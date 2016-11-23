@@ -379,7 +379,7 @@ def std_dropout_stats(model=None,
     accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
     
     learning_phase = 0
-    outputs = [mean_along_y]
+    outputs = [mean_along_y, predictions]
     out = []
     for _ in outputs:
         out.append([])
@@ -402,12 +402,13 @@ def std_dropout_stats(model=None,
     
     #compute accuracy from the scores obtained output
     accuracy/=nbsamples 
-    return out[0], accuracy
+    return out[0], out[1], accuracy
 
 
 def nearest_in_set(adv, X_train):
     ''' 
     Computed the min L2 - distance of each image in adv from X_train
+    '''
     '''
     def dist_(x,y):
         return np.linalg.norm(x.flatten()-y.flatten())
@@ -416,4 +417,13 @@ def nearest_in_set(adv, X_train):
         return np.min([dist_(x,X_train[i]) for i in range(X_train.shape[0])])
     
     return np.asarray([dist_helper(adv[i]) for i in range(adv.shape[0])])
+    '''
+    c_Xtrain = X_train
+    min_dis = np.sum(np.square(adv - c_Xtrain[0:adv.shape[0]]),axis=(1,2,3))
+    for _ in range(X_train.shape[0]):
+        c_Xtrain = np.roll(c_Xtrain,1,axis=0)
+        curr_ = np.sum(np.square(adv - c_Xtrain[0:adv.shape[0]]),axis=(1,2,3))
+        min_dis = map(lambda x,y : min(x,y), zip(min_dis,curr_))
+
+    return min_dis
 
