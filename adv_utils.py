@@ -116,7 +116,7 @@ def fgsm_generator_towards(model=None,
             feed_dict = dict()
             feed_dict[x] = X
             feed_dict[y] = towards_labels
-            feed_dict[K.learning_phase()] = learning_phase
+            feed_dict[K.learning_phase()] = 0
             batch_out = sess.run(outputs,feed_dict = feed_dict) 
             for out_elem, batch_out_ele in zip(out, batch_out):
                 out_elem.append(batch_out_ele)
@@ -259,110 +259,6 @@ def mc_dropout_eval(model=None,
 
     return mc_dropout_eval_helper(labels=labels[0:nbsamples],stoch_preds=preds, sess=sess)
 
-
-def mc_dropout_eval_depricated(model=None, 
-        generator=None, 
-        nbsamples=None, 
-        num_feed_forwards=10, 
-        sess=None):
-
-    '''
-    NOTE: tf.pack makes a copy of the same tf vairable and hence model(x) is not executed n times
-
-    TODO: try by adding to collection
-    '''
-
-    #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
-
-    
-    #define the computation graph
-    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
-    mc_approx = tf.reduce_mean(predictions,0)
-    #predictions = model(x)
-
-    
-    pred_argmax = tf.argmax(mc_approx, 1, name="predictions")
-    correct_predictions = tf.equal(pred_argmax, tf.argmax(y, 1))
-    accuracy = 0.0
-    accuracy_batch = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
-    learning_phase = 1
-    with sess.as_default():
-        #time to run the session!!
-        samples_seen = 0
-        while samples_seen < nbsamples:
-            X,Y = generator.__next__()
-            samples_seen+=X.shape[0]
-            feed_dict = dict()
-            feed_dict[x] = X
-            feed_dict[y] = Y
-            feed_dict[K.learning_phase()] = learning_phase
-            batch_out = sess.run([accuracy_batch],feed_dict = feed_dict)
-            accuracy+=batch_out[0]*X.shape[0]
-    
-    
-    #compute accuracy from the scores obtained output
-    accuracy/=nbsamples 
-    return accuracy
-
-
-def mc_dropout_stats_depricated(model=None, 
-        generator=None, 
-        nbsamples=None, 
-        num_feed_forwards=10, 
-        sess=None):
-
-    '''
-    Creates and executes ops for stochastic prediction
-    '''
-    
-    #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
-
-    
-    #define the computation graph
-    predictions = tf.pack([model(x) for _ in range(num_feed_forwards)])
-    mc_approx = tf.reduce_mean(predictions,0)
-    #predictions = model(x)
-
-    #multiply mc_approx by y to get (confidence for label y) 
-    mean_along_y = tf.reduce_max(tf.mul(mc_approx,y), 1, keep_dims = True)
-
-    #std dev (a measure of uncertainity in confidence for label y))
-    e_xx = tf.reduce_mean(tf.mul(predictions,predictions),0) 
-    std_dev_along_y = tf.sub(tf.mul(mc_approx,mc_approx),e_xx)
-
-    #variational ratio
-    temp = tf.to_float(tf.equal(predictions, tf.reduce_max(predictions, 2, keep_dims=True))) #compare with its max
-    temp = temp / tf.reduce_sum(temp, 2, keep_dims=True) #normalise
-    temp = tf.reduce_sum(temp,0) #reduce sum across T feed forwards
-    temp = tf.reduce_max(temp,1)
-    #computed the frequency of mode (exact ratio can be computed as 1 - f_m/N)
-
-    learning_phase = 1
-    outputs = [predictions, mean_along_y,std_dev_along_y, temp]
-    out = []
-    for _ in outputs:
-        out.append([])
-    with sess.as_default():
-        #time to run the session!!
-        samples_seen = 0
-        while samples_seen < nbsamples:
-            X,Y = generator.__next__()
-            samples_seen+=X.shape[0]
-            feed_dict = dict()
-            feed_dict[x] = X
-            feed_dict[y] = Y
-            feed_dict[K.learning_phase()] = learning_phase
-            batch_out = sess.run(outputs,feed_dict = feed_dict) 
-            for out_elem, batch_out_ele in zip(out, batch_out):
-                out_elem.append(batch_out_ele)
-
-    out = list(map(lambda x: np.concatenate(x, axis=0), out))
-    return out[0],out[1],out[2], out[3]
-    
 
 def mc_dropout_stats_helper(labels=None,stoch_preds=None, sess=None):
 

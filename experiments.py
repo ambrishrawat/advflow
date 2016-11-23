@@ -11,8 +11,10 @@ from keras.models import model_from_json
 from adv_utils import *
 from keras.models import load_model
 import keras
-     
+import logging
 def run(specs):
+
+    logging.basicConfig(filename=os.path.join(specs['work_dir'],specs['save_id'],'exp.log'),level=logging.INFO)
 
     '''Load model and weights together'''
     model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'))
@@ -37,6 +39,9 @@ def run(specs):
     
     while epsilon <= specs['epsilon'] :
 
+
+        logging.info('epsilon: %f',epsilon)
+
         '''Load dataset and define generators'''
         c = Cifar_npy_gen(batch_size=specs['batch_size'])
         
@@ -46,10 +51,12 @@ def run(specs):
                 nbsamples=specs['nbsamples'],
                 epsilon=epsilon,
                 sess=keras.backend.get_session())
-    
+   
+        logging.info('adversarial images generated')
 
         ''' Nearest in training set '''
-        dist_tr_ = nearest_in_set(adv, c.X_train)
+        dist_tr_ = 0.0#nearest_in_set(adv, c.X_train)
+        
         ''' MC - droput stats'''
 
         stoch_preds,means_,stds_, f_m,mc_acc = mc_dropout_stats(model=model,
@@ -62,6 +69,7 @@ def run(specs):
         #update variation ratio
         f_m = 1.0 - f_m/specs['T']
         
+        logging.info('mc-dropout stats computed')
         ''' Std - dropout stats '''
 
         mean_stddr, std_acc = std_dropout_stats(model=model,
@@ -69,7 +77,7 @@ def run(specs):
                 nbsamples=specs['nbsamples'],
                 sess=keras.backend.get_session(),
                 labels=predictions)
-        print(std_acc)
+        logging.info('std-dropout stats computed')
         
         with open(os.path.join(specs['work_dir'],specs['save_id'],'experiment_results.csv'),'a') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t')
@@ -85,7 +93,7 @@ def run(specs):
          
         
         #append arrays
-        dist_tr_e.append(np.mean(dist_tr))
+        dist_tr_e.append(np.mean(dist_tr_))
         mean_e.append(np.mean(means_))
         std_e.append(np.mean(stds_))
         var_ratio_e.append(np.mean(f_m)) 
@@ -107,11 +115,10 @@ def run(specs):
         np.save(os.path.join(specs['work_dir'],specs['save_id'],'stoch_preds_e'),stoch_preds_e)
         
         #TODO: save after every 5 iterations
-        #save_adv_e.append(adv)
-        #np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
+        save_adv_e.append(adv[0:15])
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'save_adv_e'),save_adv_e)
 
         epsilon += 0.002
-        print('epsilon:',epsilon) 
 
 if __name__ == "__main__":
     
