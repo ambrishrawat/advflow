@@ -41,7 +41,7 @@ def run(specs):
     #tw_label = np.tile(np.arange(10),10)
     #from keras.utils import np_utils
     #predictions = np_utils.to_categorical(tw_label,10)
-    adv_label = np.load('adv_label.npy')
+    adv_label = np.load('adv_label.npy')[0:100]
     while epsilon <= specs['epsilon'] :
 
         print('Yoda')
@@ -49,11 +49,11 @@ def run(specs):
 
         '''Load dataset and define generators'''
         c = Cifar_npy_gen(batch_size=specs['batch_size'])
-        #n_img = np.load('noisy_img.npy')
+        n_img = np.load('noisy_img.npy')
         #n_label = np.zeros((100,10))
         '''Get adversarial images'''
         adv = fgsm_generator_towards(model=model, 
-                generator=return_gen(c.X_test,adv_label,batch_size=specs['batch_size']), 
+                generator=return_gen(n_img,adv_label,batch_size=specs['batch_size']), 
                 nbsamples=specs['nbsamples'],
                 epsilon=epsilon,
                 sess=keras.backend.get_session())
@@ -114,27 +114,27 @@ def run(specs):
         e.append(epsilon)
     
         #save appended arrays
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmean_e'),mean_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstd_e'),std_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tvar_ratio_e'),var_ratio_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmc_acc_e'),mc_acc_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstd_acc_e'),std_acc_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmean_stddr_e'),mean_stddr_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'te'),e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tdist_tr_e'),dist_tr_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstoch_preds_e'),stoch_preds_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstddr_preds_e'),stddr_preds_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntmean_e'),mean_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntstd_e'),std_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntvar_ratio_e'),var_ratio_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntmc_acc_e'),mc_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntstd_acc_e'),std_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntmean_stddr_e'),mean_stddr_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'nte'),e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntdist_tr_e'),dist_tr_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntstoch_preds_e'),stoch_preds_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntstddr_preds_e'),stddr_preds_e)
         
         #TODO: save after every 5 iterations
         save_adv_e.append(adv[0:15])
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tsave_adv_e'),save_adv_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ntsave_adv_e'),save_adv_e)
 
-        epsilon += 0.002
+        epsilon += 0.02
 
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Generate adversarial images and save the numpy arrays')
-    parser.add_argument('--epsilon', type=str, default='0.1', help='epsilon for FastGradientSign method')
+    parser.add_argument('--epsilon', type=str, default='2.0', help='epsilon for FastGradientSign method')
     parser.add_argument('--savedir', type=str, help='location for saving the adversarial images')
     args = parser.parse_args()
     
@@ -150,9 +150,9 @@ if __name__ == "__main__":
 
     model = keras_eg_alldrop
     specs = {
-            'batch_size': 200,
+            'batch_size': 100,
             'save_id': model.__name__,
-            'nbsamples':10000,
+            'nbsamples':100,
             'epsilon':epsilon,
             'T':100,
             'work_dir':'/u/ambrish/models'

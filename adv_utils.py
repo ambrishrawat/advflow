@@ -305,6 +305,7 @@ def mc_dropout_stats_helper(labels=None,stoch_preds=None, sess=None):
     mean_along_y = tf.reduce_max(tf.mul(mc_approx,y), 1, keep_dims = True)
 
     #(variance instead of std now) std dev (a measure of uncertainity in confidence for label y))
+    # NOTE: THIS IS VARAINCE ACROSS ALL LABELS!!
     e_xx = tf.reduce_mean(tf.mul(predictions,predictions),0) 
     std_dev_along_y = tf.sub(e_xx,tf.mul(mc_approx,mc_approx))
 
