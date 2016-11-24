@@ -148,6 +148,38 @@ def fgsm_graph_towards(model=None, eps=None):
     signed_grad = tf.sign(grad)
 
     # Multiply by constant epsilon
+    scaled_signed_grad = eps * grad
+
+    # Add perturbation to original example to obtain adversarial example
+    #TOWARDS - Descent!!
+    adv_x = tf.stop_gradient(x - scaled_signed_grad)
+
+
+    return adv_x, x, y
+
+def fgsm_graph_towards_signed(model=None, eps=None):
+    '''
+    Creates adv_x ops 
+    '''
+
+    #define a placeholder for input images
+    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
+    #define the computation graph
+    predictions = model(x)
+
+    ''' Loss for the predicted label '''
+
+    #compute loss
+    loss = tf.reduce_mean(categorical_crossentropy(y, predictions))
+    
+    # Define gradient of loss wrt input
+    grad, = tf.gradients(loss, x)
+
+    # Take sign of gradient
+    signed_grad = tf.sign(grad)
+
+    # Multiply by constant epsilon
     scaled_signed_grad = eps * signed_grad
 
     # Add perturbation to original example to obtain adversarial example

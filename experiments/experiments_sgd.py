@@ -42,20 +42,22 @@ def run(specs):
     #from keras.utils import np_utils
     #predictions = np_utils.to_categorical(tw_label,10)
     adv_label = np.load('adv_label.npy')
+
+    c = Cifar_npy_gen(batch_size=specs['batch_size'])
+    adv = c.X_test
     while epsilon <= specs['epsilon'] :
 
         print('Yoda')
         logging.info('epsilon: %f',epsilon)
 
         '''Load dataset and define generators'''
-        c = Cifar_npy_gen(batch_size=specs['batch_size'])
         #n_img = np.load('noisy_img.npy')
         #n_label = np.zeros((100,10))
         '''Get adversarial images'''
         adv = fgsm_generator_towards(model=model, 
-                generator=return_gen(c.X_test,adv_label,batch_size=specs['batch_size']), 
+                generator=return_gen(adv,adv_label,batch_size=specs['batch_size']), 
                 nbsamples=specs['nbsamples'],
-                epsilon=epsilon,
+                epsilon=0.5,
                 sess=keras.backend.get_session())
    
         predictions = adv_label[0:specs['nbsamples']]
@@ -114,20 +116,20 @@ def run(specs):
         e.append(epsilon)
     
         #save appended arrays
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmean_e'),mean_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstd_e'),std_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tvar_ratio_e'),var_ratio_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmc_acc_e'),mc_acc_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstd_acc_e'),std_acc_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tmean_stddr_e'),mean_stddr_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'te'),e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tdist_tr_e'),dist_tr_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstoch_preds_e'),stoch_preds_e)
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tstddr_preds_e'),stddr_preds_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stmean_e'),mean_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ststd_e'),std_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stvar_ratio_e'),var_ratio_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stmc_acc_e'),mc_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ststd_acc_e'),std_acc_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stmean_stddr_e'),mean_stddr_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ste'),e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stdist_tr_e'),dist_tr_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ststoch_preds_e'),stoch_preds_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'ststddr_preds_e'),stddr_preds_e)
         
         #TODO: save after every 5 iterations
         save_adv_e.append(adv[0:15])
-        np.save(os.path.join(specs['work_dir'],specs['save_id'],'tsave_adv_e'),save_adv_e)
+        np.save(os.path.join(specs['work_dir'],specs['save_id'],'stsave_adv_e'),save_adv_e)
 
         epsilon += 0.002
 
