@@ -151,6 +151,7 @@ def fgsm_graph_towards(model=None, eps=None):
     scaled_signed_grad = eps * signed_grad
 
     # Add perturbation to original example to obtain adversarial example
+    #TOWARDS - Descent!!
     adv_x = tf.stop_gradient(x - scaled_signed_grad)
 
 
