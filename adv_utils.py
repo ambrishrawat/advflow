@@ -148,6 +148,7 @@ def fgsm_graph_towards(model=None, eps=None):
     signed_grad = tf.sign(grad)
 
     # Multiply by constant epsilon
+    # ADDING THE MAGNITUDE OF GRADIENT in  SGD Fashion (keep eps fized for this)
     scaled_signed_grad = eps * grad
 
     # Add perturbation to original example to obtain adversarial example
