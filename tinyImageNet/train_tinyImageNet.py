@@ -10,7 +10,7 @@ import csv
 from keras.callbacks import Callback
 import time
 from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 
 
 
@@ -45,12 +45,14 @@ def run(specs):
 
     earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
 
+    tboard = TensorBoard(log_dir=os.path.join(specs['work_dir'],specs['save_id'],'logs_tb'),
+                    histogram_freq=0, write_graph=False, write_images=False)
 
-    c_train = CSVGenerator(csv_location = 'preprocessing/random.csv',
+    c_train = CSVGenerator(csv_location = 'train_tinyImageNet.csv',
             batch_size = specs['batch_size'])
     train_gen = c_train.batch_gen()
 
-    c_test = CSVGenerator(csv_location = 'preprocessing/val_tinyImageNet.csv',
+    c_test = CSVGenerator(csv_location = 'val_tinyImageNet.csv',
             batch_size = specs['batch_size'])
     test_gen = c_test.batch_gen()
 
@@ -69,7 +71,7 @@ def run(specs):
         nb_epoch=epochs,
         validation_data = test_gen,
         nb_val_samples = c_test.N,
-        callbacks=[checkpointer,earlystopping],
+        callbacks=[checkpointer,earlystopping,tboard],
         verbose=1)
  
     pass
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = VGG_16_pretrain_2
+    model = VGG_19
     specs = {
             'model': model,
             'epochs': epochs,
