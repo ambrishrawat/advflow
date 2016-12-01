@@ -627,7 +627,7 @@ def VGG_19():
     model.add(Dense(512, activation='relu', name='dense_2'))
     model.add(Dropout(0.5))
     model.add(Dense(200, name='dense_3'))
-    model.add(Activation("sigmoid"))
+    model.add(Activation("softmax"))
 
     return model
 

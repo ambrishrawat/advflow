@@ -1,8 +1,6 @@
 import tensorflow as tf
 import os
 import pandas as pd
-from bs4 import BeautifulSoup
-from more_itertools import unique_everseen
 import numpy as np
 
 from keras.callbacks import Callback
