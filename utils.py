@@ -63,10 +63,12 @@ class CSVGenerator():
 
         self.N = self.df.shape[0]
         print("number of samples loaded",self.N)
+
         self.batch_size = batch_size
         self.total_batches_seen = 0
         self.index_gen = self._idx_gen(self.N,batch_size,shuffle)
         self.target_size = target_size
+        print(self.target_size)
 
     def get_data_size(self):
         return self.N
