@@ -48,13 +48,29 @@ def run(specs):
     tboard = TensorBoard(log_dir=os.path.join(specs['work_dir'],specs['save_id'],'logs_tb'),
                     histogram_freq=0, write_graph=False, write_images=False)
 
+
+    ''' Using CSV Generator'''
     c_train = CSVGenerator(csv_location = 'train_tinyImageNet.csv',
             batch_size = specs['batch_size'])
     train_gen = c_train.batch_gen()
-
+    
     c_test = CSVGenerator(csv_location = 'val_tinyImageNet.csv',
             batch_size = specs['batch_size'])
     test_gen = c_test.batch_gen()
+
+
+    ''' Using keras Dataflow generators '''
+    datagen = ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        rotation_range=None,
+        width_shift_range=None,
+        height_shift_range=None,
+        horizontal_flip=True,
+        vertical_flip=True)
 
 
     ''' save the final model'''
@@ -66,12 +82,14 @@ def run(specs):
 
     '''call fit_generartor'''
     model.fit_generator(
-        generator=train_gen,
-        samples_per_epoch=c_train.N,
+        #generator=train_gen,
+        generator = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/train/',batch_size=specs['batch_size'], target_size = (64,64) ),
+        samples_per_epoch=100000,
         nb_epoch=epochs,
-        validation_data = test_gen,
-        nb_val_samples = c_test.N,
-        callbacks=[checkpointer,earlystopping,tboard],
+        #validation_data = test_gen,
+        #nb_val_samples = c_test.N,
+        #callbacks=[checkpointer,earlystopping,tboard],
+        callbacks=[tboard],
         verbose=1)
  
     pass
@@ -92,7 +110,7 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = VGG_19
+    model = VGG_16
     specs = {
             'model': model,
             'epochs': epochs,
