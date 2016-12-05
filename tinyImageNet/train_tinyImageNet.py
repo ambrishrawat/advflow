@@ -33,8 +33,10 @@ def run(specs):
     '''define the optimiser and compile'''
     model = specs['model']()
 
+    sgd = SGD(lr=5.e-3, decay=0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', 
-            optimizer=specs['optimisation'], 
+            #optimizer=specs['optimisation'], 
+            optimizer=sgd, 
             metrics=['accuracy'])
 
     '''callbacks'''
@@ -86,12 +88,15 @@ def run(specs):
         generator = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/train/',batch_size=specs['batch_size'], target_size = (64,64) ),
         samples_per_epoch=100000,
         nb_epoch=epochs,
-        #validation_data = test_gen,
-        #nb_val_samples = c_test.N,
-        #callbacks=[checkpointer,earlystopping,tboard],
-        callbacks=[tboard],
+        validation_data = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/train/',batch_size=specs['batch_size'], target_size = (64,64) ),
+        nb_val_samples = 10000,
+        callbacks=[checkpointer,earlystopping,tboard],
+        #callbacks=[tboard],
         verbose=1)
- 
+
+    model.save(os.path.join(specs['work_dir'],specs['save_id'],"model_final.h5"))
+
+
     pass
 
 
@@ -101,7 +106,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training CIFAR example for LeNet architectures')
 
     #epochs, batch_size and model ID
-    parser.add_argument('--epochs', type=str, default='200', help='number of epochs (the program runs through the whole data set)')
+    parser.add_argument('--epochs', type=str, default='100', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
     args = parser.parse_args()
    
@@ -110,13 +115,13 @@ if __name__ == "__main__":
     epochs = int(args.epochs)
     batch_size = int(args.batchsize)
     
-    model = VGG_16
+    model = VGG_16_like
     specs = {
             'model': model,
             'epochs': epochs,
             'batch_size': batch_size,
             'save_id': model.__name__,
-            'optimisation': 'adam',
+            'optimisation': 'adagrad',
             'work_dir': '/u/ambrish/models'
             }
 

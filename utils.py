@@ -27,8 +27,9 @@ def load_img(img_filename):
     Returns:
         np array of float32: an image as a numpy array of float32
     """
-    img = skimage.img_as_float(imread(
-        img_filename,mode='RGB')).astype(np.float32)
+    #img = skimage.img_as_float(imread(
+    #    img_filename,mode='RGB')).astype(np.float32)
+    img = imread(img_filename,mode='RGB')
     if img.ndim == 2:
         img = img[:, :, np.newaxis]
     elif img.shape[2] == 4:
@@ -37,7 +38,7 @@ def load_img(img_filename):
     #'''Subtract channel vise mean'''
     #ch_mean = np.load('preprocessing/ch_mean.npy')
     #img = img - ch_mean
-    return img
+    return img/255
 
 
 

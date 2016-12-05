@@ -572,6 +572,36 @@ def VGG_16_pretrain_1(trainable=False, weights_path = 'models/samples/vgg16_weig
 
 
 
+
+def VGG_16_like():
+    '''
+    Fully trainable VGG19 model
+    '''
+
+    model = Sequential()
+
+    model.add(ZeroPadding2D((1,1),input_shape=(64,64,3)))
+    model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_1'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_2'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Dropout(0.5))
+
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_1'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_2'))
+    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Dropout(0.5))
+
+    model.add(Flatten())
+    model.add(Dense(512, activation='relu', name='dense_2'))
+    model.add(Dropout(0.5))
+    model.add(Dense(200, name='dense_3'))
+    model.add(Activation("softmax"))
+
+    return model
+
 def VGG_16():
     '''
     Fully trainable VGG19 model
