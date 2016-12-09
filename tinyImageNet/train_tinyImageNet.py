@@ -8,6 +8,7 @@ import os
 import numpy as np
 import csv
 from keras.callbacks import Callback
+from keras.models import load_model
 import time
 from keras.optimizers import RMSprop, SGD, Adagrad, Adadelta, Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
@@ -31,9 +32,10 @@ def run(specs):
             logfile.flush()
 
     '''define the optimiser and compile'''
-    model = specs['model']()
+    #model = specs['model']()
+    model = load_model(os.path.join(specs['work_dir'],specs['save_id'],'model2.hdf5'))
 
-    sgd = SGD(lr=5.e-3, decay=0, momentum=0.0, nesterov=False)
+    sgd = SGD(lr=5.e-3, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', 
             #optimizer=specs['optimisation'], 
             optimizer=sgd, 
@@ -41,13 +43,13 @@ def run(specs):
 
     '''callbacks'''
     checkpointer = ModelCheckpoint(
-            filepath=os.path.join(specs['work_dir'],specs['save_id'],'model.hdf5'), 
+            filepath=os.path.join(specs['work_dir'],specs['save_id'],'model4.hdf5'), 
             verbose=1, 
             save_best_only=True)
 
-    earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+    earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=1)
 
-    tboard = TensorBoard(log_dir=os.path.join(specs['work_dir'],specs['save_id'],'logs_tb'),
+    tboard = TensorBoard(log_dir=os.path.join(specs['work_dir'],specs['save_id'],'logs_tb4'),
                     histogram_freq=0, write_graph=False, write_images=False)
 
 
@@ -88,7 +90,7 @@ def run(specs):
         generator = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/train/',batch_size=specs['batch_size'], target_size = (64,64) ),
         samples_per_epoch=100000,
         nb_epoch=epochs,
-        validation_data = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/train/',batch_size=specs['batch_size'], target_size = (64,64) ),
+        validation_data = datagen.flow_from_directory('/dccstor/dlw/data/tinyImageNet/tiny-imagenet-restruct/val/',batch_size=specs['batch_size'], target_size = (64,64) ),
         nb_val_samples = 10000,
         callbacks=[checkpointer,earlystopping,tboard],
         #callbacks=[tboard],
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training CIFAR example for LeNet architectures')
 
     #epochs, batch_size and model ID
-    parser.add_argument('--epochs', type=str, default='100', help='number of epochs (the program runs through the whole data set)')
+    parser.add_argument('--epochs', type=str, default='70', help='number of epochs (the program runs through the whole data set)')
     parser.add_argument('--batchsize', type=str, default='64', help='batch size')
     args = parser.parse_args()
    
@@ -121,7 +123,7 @@ if __name__ == "__main__":
             'epochs': epochs,
             'batch_size': batch_size,
             'save_id': model.__name__,
-            'optimisation': 'adagrad',
+            'optimisation': 'rmsprop',
             'work_dir': '/u/ambrish/models'
             }
 
