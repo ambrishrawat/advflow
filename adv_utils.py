@@ -131,8 +131,8 @@ def fgsm_graph_towards(model=None, eps=None):
     '''
 
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
+    x = tf.placeholder(tf.float32, shape=model.input_shape)
+    y = tf.placeholder(tf.float32, shape=model.output_shape)
     #define the computation graph
     predictions = model(x)
 
@@ -164,8 +164,8 @@ def fgsm_graph_towards_signed(model=None, eps=None):
     '''
 
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
+    x = tf.placeholder(tf.float32, shape=model.input_shape)
+    y = tf.placeholder(tf.float32, shape=model.output_shape)
     #define the computation graph
     predictions = model(x)
 
@@ -196,8 +196,8 @@ def fgsm_graph_away(model=None, eps=None):
     '''
 
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
+    x = tf.placeholder(tf.float32, shape=model.input_shape)
+    y = tf.placeholder(tf.float32, shape=model.output_shape)
 
     #define the computation graph
     predictions = model(x)
@@ -231,8 +231,8 @@ def stoch_grads(model=None, eps=None):
     '''
 
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
-    y = tf.placeholder(tf.float32, shape=(None, 10))
+    x = tf.placeholder(tf.float32, shape=model.input_shape)
+    y = tf.placeholder(tf.float32, shape=model.output_shape)
 
     #define the computation graph
     predictions = model(x)
@@ -271,7 +271,7 @@ def mc_dropout_preds(model=None,
     '''
     
     #define a placeholder for input images
-    x = tf.placeholder(tf.float32, shape=(None, 32, 32, 3))
+    x = tf.placeholder(tf.float32, shape=model.input_shape)
     
     #define the computation graph
     predictions = model(x) 
